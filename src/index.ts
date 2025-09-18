@@ -2,6 +2,7 @@ import express from 'express'
 
 // dot env 
 import dotenv from 'dotenv'
+import newsRouter from './routes/news.route';
 dotenv.config();
 
 
@@ -19,6 +20,13 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/', (req, res) => {
     res.send('Hello World!')
 })
+
+
+
+
+// news 
+app.use('/api/news', newsRouter)
+
 
 
 // running server 
