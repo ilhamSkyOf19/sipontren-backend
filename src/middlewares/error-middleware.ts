@@ -1,8 +1,9 @@
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { ResponseMessage } from "../types/types";
+import { ZodError } from "zod";
+import { PrismaClientKnownRequestError } from "../generated/prisma/runtime/library";
 
-export const errorMiddlewate = (err: PrismaClientKnownRequestError, _req: Request, res: Response<ResponseMessage>) => {
+export const errorMiddlewate = (err: unknown, _req: Request, res: Response<ResponseMessage>, _next: NextFunction) => {
 
 
     // cek global err
@@ -36,6 +37,19 @@ export const errorMiddlewate = (err: PrismaClientKnownRequestError, _req: Reques
                     message: "Internal server error"
                 })
         }
+    }
+
+
+
+    // cek error zod 
+    if (err instanceof ZodError) {
+        // mapping error 
+        const error = err.issues.map((error) => error.message)[0];
+
+        return res.status(400).json({
+            success: false,
+            message: error
+        })
     }
 
     return res.status(500).json({

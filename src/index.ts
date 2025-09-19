@@ -3,6 +3,8 @@ import express from 'express'
 // dot env 
 import dotenv from 'dotenv'
 import newsRouter from './routes/news.route';
+import path from 'path';
+import { errorMiddlewate } from './middlewares/error-middleware';
 dotenv.config();
 
 
@@ -15,6 +17,9 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// public static
+app.use(express.static(path.join(__dirname, '../public')));
+
 
 // cek route
 app.get('/', (req, res) => {
@@ -26,6 +31,11 @@ app.get('/', (req, res) => {
 
 // news 
 app.use('/api/news', newsRouter)
+
+
+
+// error handler 
+app.use(errorMiddlewate)
 
 
 

@@ -3,12 +3,12 @@ import { Request } from "express"
 // response data 
 export type ResponseData<T> =
     {
-        success: boolean
+        success: true
         message: string
         data: T
     } |
     {
-        success: boolean
+        success: false
         message: string
     }
 
@@ -20,7 +20,7 @@ export type ResponseMessage = {
 }
 
 // response token 
-export interface ResponseToken<params = {}, _ = {}, body = {}, query = {}> extends Request<params, _, body, query> {
+export interface TokenRequest<params = {}, _ = {}, body = {}, query = {}> extends Request<params, _, body, query> {
     data?: {
         token: string
     }

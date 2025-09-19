@@ -22,10 +22,11 @@ enum Category {
 
 // news 
 model News {
-  id       Int      @id @default(autoincrement())
-  category Category @default(berita)
-  title    String
-  content  String
+  id        Int      @id @default(autoincrement())
+  category  Category @default(berita)
+  title     String
+  content   String
+  thumbnail String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
