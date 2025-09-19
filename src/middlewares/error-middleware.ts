@@ -18,19 +18,16 @@ export const errorMiddlewate = (err: unknown, _req: Request, res: Response<Respo
                     success: false,
                     message: "record not found"
                 });
-                break;
             case "P2002":
                 return res.status(409).json({
                     success: false,
                     message: "value already exists"
                 })
-                break;
             case "P2003":
                 return res.status(404).json({
                     success: false,
                     message: "referenced record not found"
                 })
-                break;
             default:
                 return res.status(500).json({
                     success: false,

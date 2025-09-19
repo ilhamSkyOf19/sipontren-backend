@@ -5,6 +5,7 @@ import dotenv from 'dotenv'
 import newsRouter from './routes/news.route';
 import path from 'path';
 import { errorMiddlewate } from './middlewares/error-middleware';
+import adminRoute from './routes/admin.route';
 dotenv.config();
 
 
@@ -31,6 +32,10 @@ app.get('/', (req, res) => {
 
 // news 
 app.use('/api/news', newsRouter)
+
+
+// admin
+app.use('/api/admin', adminRoute)
 
 
 

@@ -31,3 +31,14 @@ model News {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+// admin 
+model Admin {
+  id       Int    @id @default(autoincrement())
+  name     String
+  email    String
+  password String
+
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+}
