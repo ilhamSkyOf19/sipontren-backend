@@ -9,12 +9,18 @@ import adminRoute from './routes/admin.route';
 dotenv.config();
 import cookieParser from 'cookie-parser';
 import authRouter from './routes/auth.route';
-
+import cors from 'cors';
 
 
 // initialization express 
 const app = express();
 
+
+// cord
+app.use(cors({
+    origin: "http://localhost:5173", // base url front end
+    credentials: true, // biar cookie / Authorization header ikut
+}));
 
 // initialization cookie 
 app.use(cookieParser());
