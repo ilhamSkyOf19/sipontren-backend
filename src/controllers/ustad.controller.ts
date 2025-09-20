@@ -1,6 +1,6 @@
 import { NextFunction, Response, Request } from "express";
 import { TokenRequest, ResponseData } from "../types/types";
-import { CreateUstadType, ResponseUstadType } from "../models/ustad-model";
+import { CreateUstadType, ResponseUstadType, UpdateUstadType } from "../models/ustad-model";
 import { UstadValidation } from "../validations/ustad-validation";
 import { UstadService } from "../services/ustad.service";
 import { validation } from "../services/validation.service";
@@ -101,6 +101,55 @@ export class UstadController {
 
         } catch (error) {
             // cek error
+            console.log(error);
+            next(error);
+        }
+    }
+
+
+    // update 
+    static async update(req: Request<{ id: string }, {}, UpdateUstadType>, res: Response<ResponseData<ResponseUstadType>>, next: NextFunction) {
+
+
+        try {
+            // get id params
+            const id = req.params.id;
+
+
+            // get body 
+            const body = validation<UpdateUstadType>(UstadValidation.UPDATE, req.body);
+
+
+            // cek validation 
+            if (!body.success) {
+                // cek file 
+                if (req.file) {
+                    await FileService.deleteFile(req.file?.path)
+                }
+
+                // return
+                return res.status(400).json({
+                    success: false,
+                    message: body.message
+                });
+            }
+
+
+            // get service 
+            const response = await UstadService.update(Number(id), req.file?.filename ?? '', body.data);
+
+            // cek response 
+            if (!response.success) {
+                return res.status(400).json(response);
+            }
+
+            // return response 
+            return res.status(200).json(response)
+
+
+
+        } catch (error) {
+            // cek error 
             console.log(error);
             next(error);
         }

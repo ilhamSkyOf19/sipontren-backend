@@ -24,5 +24,9 @@ ustadRoute.get('/read', UstadController.read);
 ustadRoute.get('/detail/:id', tokenMiddleware, UstadController.detail);
 
 
+// update 
+ustadRoute.patch('/update/:id', tokenMiddleware, upload.single('ustad_img'), UstadController.update);
+
+
 // return 
 export default ustadRoute;

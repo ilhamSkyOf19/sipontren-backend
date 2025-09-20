@@ -1,6 +1,7 @@
 import prisma from "../lib/prismaClient";
-import { CreateUstadType, ResponseUstadType, toResponseUstadType } from "../models/ustad-model";
+import { CreateUstadType, ResponseUstadType, toResponseUstadType, UpdateUstadType } from "../models/ustad-model";
 import { ResponseData } from "../types/types";
+import { FileService } from "./file.service";
 
 export class UstadService {
 
@@ -90,6 +91,52 @@ export class UstadService {
         }
     }
 
+
+    // update 
+    static async update(id: number, ustad_img: string, req: UpdateUstadType): Promise<ResponseData<ResponseUstadType>> {
+
+        // get ustad 
+        const ustad = await this.detail(id);
+
+
+        // cek ustad 
+        if (!ustad.success) return ustad;
+
+
+        // cek file 
+        if (ustad_img) {
+            // delete file 
+            await FileService.deleteFormPath(ustad.data.ustad_img, 'ustad_img');
+        }
+
+
+        // update 
+        const response = await prisma.ustad.update({
+            where: {
+                id
+            },
+            data: {
+                ...req,
+                ustad_img
+            }
+        })
+
+
+        // generate url img ustad
+        const url_ustad_img = `${process.env.BASE_URL}/ustad_img/${response.ustad_img}`
+
+
+        // return
+        return {
+            success: true,
+            message: "success update ustad",
+            data: toResponseUstadType({
+                ...response,
+                url_ustad_img
+            })
+        }
+
+    }
 
 
 
