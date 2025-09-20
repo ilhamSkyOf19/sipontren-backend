@@ -1,5 +1,6 @@
 import prisma from "../lib/prismaClient";
 import { CreateUstadType, ResponseUstadType, toResponseUstadType } from "../models/ustad-model";
+import { ResponseData } from "../types/types";
 
 export class UstadService {
 
@@ -31,4 +32,66 @@ export class UstadService {
             url_ustad_img
         });
     }
+
+
+    // read
+    static async read(): Promise<ResponseUstadType[]> {
+
+        const response = await prisma.ustad.findMany();
+
+        // generate url
+        const data: ResponseUstadType[] = response.map((item: Omit<ResponseUstadType, 'url_ustad_img'>) => {
+
+            // generate url 
+            const url_ustad_img = `${process.env.BASE_URL}/ustad_img/${item.ustad_img}`
+            // return 
+            return {
+                ...item,
+                url_ustad_img
+            }
+
+
+        })
+
+
+        // return 
+        return data.map((ustad) => toResponseUstadType(ustad))
+    }
+
+
+    // read detial
+    static async detail(id: number): Promise<ResponseData<ResponseUstadType>> {
+
+        // get response 
+        const response = await prisma.ustad.findFirst({
+            where: {
+                id
+            }
+        })
+
+        // cek response 
+        if (!response) return {
+            success: false,
+            message: "Ustad not found",
+        }
+
+        // generate url thumbnail 
+        const url_ustad_img = `${process.env.BASE_URL}/ustad_img/${response.ustad_img}`
+
+
+        // return
+        return {
+            success: true,
+            message: "success read detail ustad",
+            data: toResponseUstadType({
+                ...response,
+                url_ustad_img
+            })
+        }
+    }
+
+
+
+
+
 }

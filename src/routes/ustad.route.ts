@@ -16,5 +16,13 @@ const upload = createMulterUploader({
 ustadRoute.post('/create', tokenMiddleware, upload.single('ustad_img'), UstadController.create);
 
 
+// read 
+ustadRoute.get('/read', UstadController.read);
+
+
+// read detail
+ustadRoute.get('/detail/:id', tokenMiddleware, UstadController.detail);
+
+
 // return 
 export default ustadRoute;
