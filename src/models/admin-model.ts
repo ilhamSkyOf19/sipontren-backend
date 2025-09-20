@@ -6,11 +6,12 @@ export type CreateAdminType = {
     name: string
     email: string
     password: string
+    role: 'admin'
 }
 
 
 // update 
-export type UpdateAdminType = Partial<CreateAdminType> & {
+export type UpdateAdminType = Partial<Omit<CreateAdminType, 'role'>> & {
     id: number;
 }
 
@@ -30,6 +31,7 @@ export const toResponseAdminType = (admin: Admin): ResponseAdminType => {
         id: admin.id,
         name: admin.name,
         email: admin.email,
+        role: admin.role,
         createAt: admin.createAt,
         updateAt: admin.updateAt
 

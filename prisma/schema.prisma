@@ -20,6 +20,11 @@ enum Category {
   artikel
 }
 
+// enum role 
+enum Role {
+  admin
+}
+
 // news 
 model News {
   id        Int      @id @default(autoincrement())
@@ -38,6 +43,7 @@ model Admin {
   name     String
   email    String
   password String
+  role     Role   @default(admin)
 
   createAt DateTime @default(now())
   updateAt DateTime @updatedAt

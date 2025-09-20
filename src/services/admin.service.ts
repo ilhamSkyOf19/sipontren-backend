@@ -23,5 +23,4 @@ export class AdminService {
         return toResponseAdminType(response)
     }
 
-    // auth 
 }

@@ -3,6 +3,7 @@ export type payloadType = {
     id: number;
     email: string;
     name: string;
+    role: 'admin'
 }
 
 

@@ -22,6 +22,9 @@ export type ResponseMessage = {
 // response token 
 export interface TokenRequest<params = {}, _ = {}, body = {}, query = {}> extends Request<params, _, body, query> {
     data?: {
-        token: string
+        id: number
+        name: string
+        email: string
+        role: string
     }
 }

@@ -44,7 +44,8 @@ export class AuthService {
         const payload: payloadType = {
             id: admin.id,
             email: admin.email,
-            name: admin.name
+            name: admin.name,
+            role: 'admin'
         }
 
         // generate jwt 
@@ -64,6 +65,7 @@ export class AuthService {
         }
 
     }
+
 
 
 

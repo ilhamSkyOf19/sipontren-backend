@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { ResponseData } from "../types/types";
+import { ResponseData, ResponseMessage } from "../types/types";
 import { LoginType } from "../models/auth-model";
 import { AuthService } from "../services/auth.service";
 
@@ -27,7 +27,8 @@ export class AuthController {
             res.cookie('token', response.data, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
-                maxAge: 24 * 60 * 60 * 1000
+                maxAge: 24 * 60 * 60 * 1000,
+                sameSite: 'none'
             })
 
 
@@ -38,6 +39,34 @@ export class AuthController {
                 message: "success login",
                 data: ''
             })
+
+        } catch (error) {
+            // error handler
+            console.log(error)
+            next(error)
+        }
+    }
+
+
+    // logout
+    static async logout(req: Request, res: Response<ResponseMessage>, next: NextFunction) {
+        try {
+
+            // delete cookie 
+            res.clearCookie('token', {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                maxAge: 24 * 60 * 60 * 1000,
+                sameSite: 'none'
+            })
+
+
+            // return response
+            return res.status(200).json({
+                success: true,
+                message: "success logout"
+            })
+
 
         } catch (error) {
             // error handler

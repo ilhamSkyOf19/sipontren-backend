@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { NewsController } from '../controllers/news.controller';
 import { createMulterUploader } from '../services/multer.service';
-import { NewsService } from '../services/news.service';
+import { tokenMiddleware } from '../middlewares/token-middleware';
 
 // initalization express 
 const newsRouter: Router = Router();
@@ -14,23 +14,23 @@ const upload = createMulterUploader({
 
 
 // create 
-newsRouter.post('/create', upload.single('news'), NewsController.create);
+newsRouter.post('/create', tokenMiddleware, upload.single('news'), NewsController.create);
 
 
-// read 
+// read public
 newsRouter.get('/read', NewsController.read);
 
 // detail
-newsRouter.get('/detail/:id', NewsController.detail);
+newsRouter.get('/detail/:id', tokenMiddleware, NewsController.detail);
 
 
 
 // update 
-newsRouter.patch('/update/:id', upload.single('news'), NewsController.update);
+newsRouter.patch('/update/:id', tokenMiddleware, upload.single('news'), NewsController.update);
 
 
 // delete 
-newsRouter.delete('/delete/:id', NewsController.delete);
+newsRouter.delete('/delete/:id', tokenMiddleware, NewsController.delete);
 
 
 // export 
