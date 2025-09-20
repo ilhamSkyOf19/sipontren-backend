@@ -28,5 +28,9 @@ ustadRoute.get('/detail/:id', tokenMiddleware, UstadController.detail);
 ustadRoute.patch('/update/:id', tokenMiddleware, upload.single('ustad_img'), UstadController.update);
 
 
+// delete 
+ustadRoute.delete('/delete/:id', tokenMiddleware, UstadController.delete);
+
+
 // return 
 export default ustadRoute;

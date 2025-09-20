@@ -1,6 +1,6 @@
 import prisma from "../lib/prismaClient";
 import { CreateUstadType, ResponseUstadType, toResponseUstadType, UpdateUstadType } from "../models/ustad-model";
-import { ResponseData } from "../types/types";
+import { ResponseData, ResponseMessage } from "../types/types";
 import { FileService } from "./file.service";
 
 export class UstadService {
@@ -134,6 +134,37 @@ export class UstadService {
                 ...response,
                 url_ustad_img
             })
+        }
+
+    }
+
+
+    // delete 
+    static async delete(id: number): Promise<ResponseMessage> {
+
+        // get ustad 
+        const ustad = await this.detail(id);
+
+        // cek ustad 
+        if (!ustad.success) return ustad;
+
+
+        // delete file 
+        await FileService.deleteFormPath(ustad.data.ustad_img, 'ustad_img');
+
+
+        // delete ustad 
+        await prisma.ustad.delete({
+            where: {
+                id
+            }
+        })
+
+
+        // return 
+        return {
+            success: true,
+            message: "success delete ustad"
         }
 
     }

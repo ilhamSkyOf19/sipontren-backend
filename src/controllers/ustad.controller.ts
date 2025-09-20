@@ -1,5 +1,5 @@
 import { NextFunction, Response, Request } from "express";
-import { TokenRequest, ResponseData } from "../types/types";
+import { TokenRequest, ResponseData, ResponseMessage } from "../types/types";
 import { CreateUstadType, ResponseUstadType, UpdateUstadType } from "../models/ustad-model";
 import { UstadValidation } from "../validations/ustad-validation";
 import { UstadService } from "../services/ustad.service";
@@ -147,6 +147,30 @@ export class UstadController {
             return res.status(200).json(response)
 
 
+
+        } catch (error) {
+            // cek error 
+            console.log(error);
+            next(error);
+        }
+    }
+
+    // delete 
+    static async delete(req: TokenRequest<{ id: string }>, res: Response<ResponseMessage>, next: NextFunction) {
+        try {
+            // get params id 
+            const id = req.params.id;
+
+            // get service 
+            const response = await UstadService.delete(Number(id));
+
+            // cek response 
+            if (!response.success) {
+                return res.status(400).json(response);
+            }
+
+            // return response 
+            return res.status(200).json(response)
 
         } catch (error) {
             // cek error 
