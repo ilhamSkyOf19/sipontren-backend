@@ -1,21 +1,23 @@
 import { NextFunction, Request, Response } from "express";
 import { ResponseMessage, TokenRequest } from "../types/types";
 import jwt from "jsonwebtoken";
-import { payloadType } from "../models/auth-model";
+import { PayloadType } from "../models/auth-model";
 export const tokenMiddleware = (req: TokenRequest, res: Response<ResponseMessage>, next: NextFunction) => {
     try {
         // get token from cookie 
         const token: string = req.cookies?.token;
 
+        console.log(token)
+
 
         // cek token 
         if (!token) return res.status(401).json({
             success: false,
-            message: "Unauthorized"
+            message: "Unauthorized Ini"
         });
 
         // get payload
-        const payload = jwt.verify(token, process.env.JWT_SECRET_KEY || "") as payloadType;
+        const payload = jwt.verify(token, process.env.JWT_SECRET_KEY || "") as PayloadType;
 
         // cek role 
         if (payload.role !== 'admin') return res.status(401).json({
