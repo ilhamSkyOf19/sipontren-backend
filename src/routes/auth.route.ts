@@ -11,6 +11,10 @@ import { tokenMiddleware } from '../middlewares/token-middleware';
 const authRouter: Router = Router();
 
 
+// cek auth 
+authRouter.post('/cek', tokenMiddleware, AuthController.cekAuth);
+
+
 // login 
 authRouter.post('/login', zodValidation<LoginType>(AuthValidation.LOGIN), AuthController.login);
 
