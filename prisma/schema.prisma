@@ -25,6 +25,12 @@ enum Role {
   admin
 }
 
+// enum jenis kelamin 
+enum Jenis_Kelamin {
+  laki_laki
+  perempuan
+}
+
 // news 
 model News {
   id        Int      @id @default(autoincrement())
@@ -44,6 +50,22 @@ model Admin {
   email    String
   password String
   role     Role   @default(admin)
+
+  createAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+}
+
+// ustad 
+model Ustad {
+  id            Int           @id @default(autoincrement())
+  name          String
+  jenis_kelamin Jenis_Kelamin
+  tempat_lahir  String
+  tanggal_lahir String
+  alamat        String
+  no_telepon    String
+  jabatan       String
+  ustad_img     String
 
   createAt DateTime @default(now())
   updateAt DateTime @updatedAt

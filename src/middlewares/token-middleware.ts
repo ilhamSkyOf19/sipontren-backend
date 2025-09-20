@@ -7,7 +7,6 @@ export const tokenMiddleware = (req: TokenRequest, res: Response<ResponseMessage
         // get token from cookie 
         const token: string = req.cookies?.token;
 
-        console.log(token)
 
 
         // cek token 

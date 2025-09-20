@@ -10,6 +10,7 @@ dotenv.config();
 import cookieParser from 'cookie-parser';
 import authRouter from './routes/auth.route';
 import cors from 'cors';
+import ustadRoute from './routes/ustad.route';
 
 
 // initialization express 
@@ -53,6 +54,9 @@ app.use('/api/news', newsRouter)
 // admin
 app.use('/api/admin', adminRoute)
 
+
+// ustad
+app.use('/api/ustad', ustadRoute)
 
 
 // error handler 
