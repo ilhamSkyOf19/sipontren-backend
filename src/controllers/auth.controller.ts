@@ -1,9 +1,32 @@
 import { NextFunction, Request, Response } from "express";
-import { ResponseData, ResponseMessage } from "../types/types";
-import { LoginType } from "../models/auth-model";
+import { ResponseData, ResponseMessage, TokenRequest } from "../types/types";
+import { LoginType, PayloadType } from "../models/auth-model";
 import { AuthService } from "../services/auth.service";
 
 export class AuthController {
+
+
+    // cek auth 
+    static async cekAuth(req: TokenRequest, res: Response<ResponseData<PayloadType>>, next: NextFunction) {
+        try {
+
+            // cek data token 
+            const { id, name, email, role } = req.data as PayloadType;
+
+
+            // return response 
+            return res.status(200).json({
+                success: true,
+                message: "success cek auth",
+                data: { id, name, email, role }
+            })
+
+        } catch (error) {
+            // error handler
+            console.log(error)
+            next(error)
+        }
+    }
 
     // login 
     static async login(req: Request<{}, {}, LoginType>, res: Response<ResponseData<string>>, next: NextFunction) {

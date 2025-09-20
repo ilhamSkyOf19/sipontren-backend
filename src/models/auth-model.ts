@@ -1,5 +1,5 @@
 // payload 
-export type payloadType = {
+export type PayloadType = {
     id: number;
     email: string;
     name: string;

@@ -1,5 +1,5 @@
 import prisma from "../lib/prismaClient";
-import { LoginType, payloadType } from "../models/auth-model";
+import { LoginType, PayloadType } from "../models/auth-model";
 import { ResponseData, ResponseMessage } from "../types/types";
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
@@ -41,7 +41,7 @@ export class AuthService {
         }
 
         // generate payload
-        const payload: payloadType = {
+        const payload: PayloadType = {
             id: admin.id,
             email: admin.email,
             name: admin.name,
