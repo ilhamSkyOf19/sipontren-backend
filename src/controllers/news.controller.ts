@@ -30,7 +30,7 @@ export class NewsController {
 
             // cek validation 
             if (!body.success) {
-                // cek file and delete 
+                // cek file and deletezzz 
                 if (req.file) {
                     await FileService.deleteFile(req.file?.path)
                 }
@@ -104,6 +104,21 @@ export class NewsController {
 
             // cek params id 
             const id = req.params.id;
+
+            // cek news 
+            const news = await NewsService.detail(Number(id));
+
+            // cek news 
+            if (!news) {
+                // cek file 
+                if (req.file) {
+                    await FileService.deleteFile(req.file?.path)
+                }
+                return res.status(400).json({
+                    success: false,
+                    message: 'news not found'
+                })
+            }
 
             // cek body 
             const body = validation<UpdateNewsType>(NewsValidation.UPDATE, req.body);

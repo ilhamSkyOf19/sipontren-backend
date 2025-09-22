@@ -25,6 +25,13 @@ enum Role {
   admin
 }
 
+// enum jenis sekolah 
+enum Sekolah {
+  SD
+  SMP
+  SMA
+}
+
 // enum jenis kelamin 
 enum Jenis_Kelamin {
   laki_laki
@@ -69,4 +76,30 @@ model Ustad {
 
   createAt DateTime @default(now())
   updateAt DateTime @updatedAt
+}
+
+// student 
+model Student {
+  id                  Int           @id @default(autoincrement())
+  jenis_sekolah       Sekolah
+  nisn                String
+  nik                 String
+  nama_lengkap        String
+  jenis_kelamin       Jenis_Kelamin
+  usia                Int
+  tempat_lahir        String
+  tanggal_lahir       String
+  alamat              String
+  anak_ke             Int
+  jumlah_saudara      Int
+  asal_sekolah        String
+  alamat_sekolah_asal String
+  nama_lengkap_ayah   String
+  nama_lengkap_ibu    String
+  nama_lengkap_wali   String
+  foto_formal         String
+  fc_akta_kelahiran   String
+  foto_kk             String
+  fc_ktp              String
+  fc_kis_kip          String
 }

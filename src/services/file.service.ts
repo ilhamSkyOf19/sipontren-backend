@@ -34,10 +34,14 @@ export class FileService {
             message: 'File not exist'
         }
 
+
         // path file 
         const filePathFull = path.join(
-            __dirname,
-            `../../public/uploads/${filePath}/${fileName}`);
+            process.cwd(),
+            `public/uploads/${filePath}/${fileName}`
+        );
+
+
 
         // delete file 
         try {

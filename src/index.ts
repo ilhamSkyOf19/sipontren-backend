@@ -11,6 +11,7 @@ import cookieParser from 'cookie-parser';
 import authRouter from './routes/auth.route';
 import cors from 'cors';
 import ustadRoute from './routes/ustad.route';
+import studentRouter from './routes/student.route';
 
 
 // initialization express 
@@ -57,6 +58,9 @@ app.use('/api/admin', adminRoute)
 
 // ustad
 app.use('/api/ustad', ustadRoute)
+
+// student
+app.use('/api/student', studentRouter)
 
 
 // error handler 

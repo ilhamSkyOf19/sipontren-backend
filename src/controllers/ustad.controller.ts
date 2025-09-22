@@ -116,6 +116,20 @@ export class UstadController {
             const id = req.params.id;
 
 
+            // cek ustad 
+            const ustad = await UstadService.detail(Number(id));
+
+            // cek ustad 
+            if (!ustad.success) {
+                // cek file 
+                if (req.file) {
+                    await FileService.deleteFile(req.file?.path)
+                }
+
+                return res.status(400).json(ustad);
+            }
+
+
             // get body 
             const body = validation<UpdateUstadType>(UstadValidation.UPDATE, req.body);
 

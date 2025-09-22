@@ -117,7 +117,7 @@ export class UstadService {
             },
             data: {
                 ...req,
-                ustad_img
+                ustad_img: ustad_img ? ustad_img : ustad.data.ustad_img
             }
         })
 
