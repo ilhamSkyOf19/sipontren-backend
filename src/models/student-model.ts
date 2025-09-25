@@ -21,6 +21,7 @@ export type CreateStudentType = {
     tempat_lahir: string;
     tanggal_lahir: string; // bisa diganti Date kalau di DB kamu pakai DateTime
     alamat: string;
+    no_telepon: string;
     anak_ke: string;
     jumlah_saudara: string;
     asal_sekolah: string;
@@ -56,6 +57,7 @@ export const toResponseStudentType = (student: Student): ResponseStudentType => 
         jenis_sekolah: student.jenis_sekolah,
         nisn: student.nisn,
         nik: student.nik,
+        no_telepon: student.no_telepon,
         nama_lengkap: student.nama_lengkap,
         jenis_kelamin: student.jenis_kelamin,
         usia: student.usia,

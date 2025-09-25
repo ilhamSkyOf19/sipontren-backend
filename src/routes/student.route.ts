@@ -33,7 +33,7 @@ studentRouter.post("/create", tokenMiddleware, studentUpload, StudentController.
 studentRouter.get("/read", StudentController.read);
 
 // detail
-// studentRouter.get("/detail/:id", tokenMiddleware, StudentController.detail);
+studentRouter.get("/detail/:id", tokenMiddleware, StudentController.detail);
 
 // update
 studentRouter.patch("/update/:id", tokenMiddleware, studentUpload, StudentController.update);

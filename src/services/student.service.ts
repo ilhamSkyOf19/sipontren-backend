@@ -24,6 +24,7 @@ export class StudentService {
                 nama_lengkap_ayah: req.nama_lengkap_ayah,
                 nama_lengkap_ibu: req.nama_lengkap_ibu,
                 nama_lengkap_wali: req.nama_lengkap_wali,
+                no_telepon: req.no_telepon,
 
                 // file upload
                 foto_formal: file.foto_formal,
@@ -146,6 +147,7 @@ export class StudentService {
                 nama_lengkap_ayah: req.nama_lengkap_ayah,
                 nama_lengkap_ibu: req.nama_lengkap_ibu,
                 nama_lengkap_wali: req.nama_lengkap_wali,
+                no_telepon: req.no_telepon,
 
                 // file upload
                 foto_formal: file.foto_formal ? file.foto_formal : student.data.foto_formal,

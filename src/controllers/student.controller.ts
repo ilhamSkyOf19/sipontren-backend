@@ -5,6 +5,7 @@ import { validation } from "../services/validation.service";
 import { StudentValidation } from "../validations/student-validation";
 import { FileService } from "../services/file.service";
 import { StudentService } from "../services/student.service";
+import { stat } from "fs";
 
 export class StudentController {
 
@@ -24,6 +25,40 @@ export class StudentController {
             });
         } catch (error) {
             next(error);
+        }
+    }
+
+    // detail 
+    static async detail(req: Request<{ id: string }>, res: Response<ResponseData<ResponseStudentType>>, next: NextFunction) {
+        try {
+            // get id params 
+            const id = req.params.id;
+
+
+            // get service 
+            const response = await StudentService.detail(Number(id))
+
+
+            // cek response 
+            if (!response.success) {
+                return res.status(400).json({
+                    success: false,
+                    message: response.message
+                })
+            }
+
+
+            // return 
+            return res.status(200).json({
+                success: true,
+                message: response.message,
+                data: response.data
+            })
+        } catch (error) {
+
+            // error handler 
+            console.log(error)
+            next(error)
         }
     }
 

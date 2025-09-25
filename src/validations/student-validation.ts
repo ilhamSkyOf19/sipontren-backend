@@ -106,6 +106,13 @@ export class StudentValidation {
                     ? "nama_lengkap_wali harus diisi"
                     : "nama_lengkap_wali harus berupa string",
         }),
+        no_telepon: z.string({
+            error: (val) =>
+                val.input === undefined
+                    ? "no_telepon harus diisi"
+                    : "no_telepon harus berupa string",
+        })
+
     }).strict() as ZodType<CreateStudentType>;
 
     // UPDATE
@@ -215,5 +222,11 @@ export class StudentValidation {
                     ? "nama_lengkap_wali harus diisi"
                     : "nama_lengkap_wali harus berupa string",
         }).optional(),
+        no_telepon: z.string({
+            error: (val) =>
+                val.input === undefined
+                    ? "no_telepon harus diisi"
+                    : "no_telepon harus berupa string",
+        }).optional()
     }).strict() as ZodType<UpdateStudentType>;
 }

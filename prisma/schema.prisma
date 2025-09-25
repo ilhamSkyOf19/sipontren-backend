@@ -90,6 +90,7 @@ model Student {
   tempat_lahir        String
   tanggal_lahir       String
   alamat              String
+  no_telepon          String
   anak_ke             Int
   jumlah_saudara      Int
   asal_sekolah        String
