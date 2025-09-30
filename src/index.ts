@@ -20,7 +20,7 @@ const app = express();
 
 // cord
 app.use(cors({
-    origin: "http://localhost:5173", // base url front end
+    origin: ["http://localhost:5173", "https://31fbfbe1d62b.ngrok-free.app"], // base url front end
     credentials: true, // biar cookie / Authorization header ikut
 }));
 
