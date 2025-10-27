@@ -12,6 +12,8 @@ import authRouter from './routes/auth.route';
 import cors from 'cors';
 import ustadRoute from './routes/ustad.route';
 import studentRouter from './routes/student.route';
+import pamfletRoute from './routes/pamflet.route';
+import alumniRoute from './routes/alumni.route';
 
 
 // initialization express 
@@ -20,9 +22,10 @@ const app = express();
 
 // cord
 app.use(cors({
-    origin: ["http://localhost:5173", "https://31fbfbe1d62b.ngrok-free.app"], // base url front end
-    credentials: true, // biar cookie / Authorization header ikut
+    origin: true, // izinkan semua origin
+    credentials: true, // tetap izinkan cookie/authorization
 }));
+
 
 // initialization cookie 
 app.use(cookieParser());
@@ -62,6 +65,11 @@ app.use('/api/ustad', ustadRoute)
 // student
 app.use('/api/student', studentRouter)
 
+// alumni
+app.use('/api/alumni', alumniRoute)
+
+// pamflet 
+app.use('/api/pamflet', pamfletRoute)
 
 // error handler 
 app.use(errorMiddlewate)

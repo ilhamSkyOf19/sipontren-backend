@@ -78,6 +78,18 @@ model Ustad {
   updateAt DateTime @updatedAt
 }
 
+// alumni
+model Alumni {
+  id          Int    @id @default(autoincrement())
+  name        String
+  angkatan    String
+  img_alumni  String
+  description String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 // student 
 model Student {
   id                  Int           @id @default(autoincrement())
@@ -103,4 +115,12 @@ model Student {
   foto_kk             String
   fc_ktp              String
   fc_kis_kip          String
+}
+
+// pamflet 
+model Pamflet {
+  id        Int      @id @default(autoincrement())
+  pamflet   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

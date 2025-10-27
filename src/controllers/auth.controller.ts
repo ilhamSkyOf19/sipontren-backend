@@ -49,10 +49,10 @@ export class AuthController {
             // set cookie 
             res.cookie('token', response.data, {
                 httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
+                secure: true,        // wajib true untuk sameSite: 'none'
+                sameSite: 'none',    // biar bisa lintas origin (ngrok / IP)
                 maxAge: 24 * 60 * 60 * 1000,
-                // sameSite: 'none'
-            })
+            });
 
 
 

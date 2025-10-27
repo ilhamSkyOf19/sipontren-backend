@@ -219,4 +219,44 @@ export class StudentController {
         }
     }
 
+
+    // search 
+    static async search(req: Request<{}, {}, {}, { name: string }>, res: Response<ResponseData<ResponseStudentType[]>>) {
+        try {
+            const { name } = req.query;
+
+            // validasi query
+            if (!name || typeof name !== "string") {
+                return res.status(400).json({
+                    success: false,
+                    message: "Name is required and must be a string",
+                });
+            }
+
+            const users = await StudentService.searchByName(name);
+
+            // cek response
+            if (!users.success) {
+                return res.status(400).json({
+                    success: false,
+                    message: users.message,
+                });
+            }
+
+
+
+            return res.json({
+                success: true,
+                message: "Search successful",
+                data: users.data,
+            });
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({
+                success: false,
+                message: "Internal server error",
+            });
+        }
+    }
+
 }

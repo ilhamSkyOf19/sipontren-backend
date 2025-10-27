@@ -41,5 +41,9 @@ studentRouter.patch("/update/:id", tokenMiddleware, studentUpload, StudentContro
 // delete
 studentRouter.delete("/delete/:id", tokenMiddleware, StudentController.delete);
 
+
+// search 
+studentRouter.get("/search", tokenMiddleware, StudentController.search);
+
 // export
 export default studentRouter;

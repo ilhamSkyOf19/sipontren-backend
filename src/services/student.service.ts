@@ -204,5 +204,21 @@ export class StudentService {
         }
     }
 
+    static async searchByName(name: string): Promise<ResponseData<ResponseStudentType[]>> {
+        const response = await prisma.student.findMany({
+            where: {
+                nama_lengkap: {
+                    contains: name,
+                },
+            },
+        });
+
+        // return response 
+        return {
+            success: true,
+            message: 'berhasil membaca student',
+            data: response.map(toResponseStudentType)
+        }
+    }
 
 }
