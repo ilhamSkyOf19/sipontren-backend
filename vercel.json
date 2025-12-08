@@ -4,13 +4,8 @@
     {
       "src": "src/index.ts",
       "use": "@vercel/node",
-      "config": { "includeFiles": ["src/**"] }
+      "config": { "runtime": "nodejs20.x" }
     }
   ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "src/index.ts"
-    }
-  ]
+  "routes": [{ "src": "/(.*)", "dest": "src/index.ts" }]
 }
