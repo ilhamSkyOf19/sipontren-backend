@@ -26,14 +26,23 @@ export class UstadController {
           .json({ success: false, message: "File is required" });
       }
 
-      const body = validation<CreateUstadType>(UstadValidation.CREATE, rawBody);
+      const body = validation<Omit<CreateUstadType, "ustad_img">>(
+        UstadValidation.CREATE,
+        rawBody
+      );
 
       if (!body.success) {
         await FileService.deleteFile(req.file.path);
         return res.status(400).json({ success: false, message: body.message });
       }
 
-      const response = await UstadService.create(body.data, req.file.filename);
+      const response = await UstadService.create(
+        {
+          ...body.data,
+          ustad_img: req.file.filename,
+        },
+        req.file.filename
+      );
 
       return res.status(200).json({
         success: true,
@@ -102,7 +111,7 @@ export class UstadController {
         return res.status(400).json(ustad);
       }
 
-      const body = validation<UpdateUstadType>(
+      const body = validation<Omit<UpdateUstadType, "ustad_img" | "_id">>(
         UstadValidation.UPDATE,
         req.body
       );
@@ -112,11 +121,11 @@ export class UstadController {
         return res.status(400).json({ success: false, message: body.message });
       }
 
-      const response = await UstadService.update(
-        _id,
-        req.file?.filename ?? "",
-        body.data
-      );
+      const response = await UstadService.update(req.file?.filename ?? "", {
+        ...body.data,
+        _id: ustad.data._id,
+        ustad_img: req.file?.filename ?? ustad.data.ustad_img,
+      });
 
       if (!response.success) return res.status(400).json(response);
 

@@ -58,11 +58,10 @@ export class UstadService {
 
   // update
   static async update(
-    _id: string,
     ustad_img: string | undefined,
     req: UpdateUstadType
   ): Promise<ResponseData<ResponseUstadType>> {
-    const ustad = await this.detail(_id);
+    const ustad = await this.detail(req._id);
     if (!ustad.success) return ustad;
 
     if (ustad_img) {
@@ -71,7 +70,7 @@ export class UstadService {
     }
 
     const updated = await UstadModel.findByIdAndUpdate(
-      _id,
+      req._id,
       {
         ...req,
         url_ustad_img: req.ustad_img

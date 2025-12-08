@@ -3,104 +3,101 @@ import { ResponseData } from "../types/types";
 import { PamfletService } from "../services/pamflet.service";
 
 export class PamfletController {
-    // create 
-    static async create(req: Request, res: Response<ResponseData<{ id: number; img: string }>>, next: NextFunction) {
-        try {
-            // cek file 
-            if (req.file === undefined) {
-                return res.status(400).json({
-                    success: false,
-                    message: "File is required"
-                })
-            }
+  // create
+  static async create(
+    req: Request,
+    res: Response<ResponseData<{ _id: string; img: string }>>,
+    next: NextFunction
+  ) {
+    try {
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          message: "File is required",
+        });
+      }
 
+      const response = await PamfletService.create(req.file.filename);
 
-            // get service
-            const response = await PamfletService.create(req.file.filename);
-
-
-
-
-            return res.status(200).json({
-                success: true,
-                message: 'success created',
-                data: response
-
-            })
-        } catch (error) {
-            // error handler
-            console.log(error)
-            next(error)
-        }
+      return res.status(201).json({
+        success: true,
+        message: "Pamflet created successfully",
+        data: response,
+      });
+    } catch (error) {
+      console.log(error);
+      next(error);
     }
+  }
 
-    // read 
-    static async read(_req: Request, res: Response<ResponseData<{ id: number; img: string }[]>>, next: NextFunction) {
-        try {
-            // get service 
-            const response = await PamfletService.read();
+  // read all
+  static async read(
+    _req: Request,
+    res: Response<ResponseData<{ _id: string; img: string }[]>>,
+    next: NextFunction
+  ) {
+    try {
+      const response = await PamfletService.read();
 
-            return res.status(200).json({
-                success: true,
-                message: 'success read pamflet',
-                data: response
-            })
-        } catch (error) {
-            // error handler
-            console.log(error)
-            next(error)
-        }
+      return res.status(200).json({
+        success: true,
+        message: "List of pamflets",
+        data: response,
+      });
+    } catch (error) {
+      console.log(error);
+      next(error);
     }
+  }
 
+  // update
+  static async update(
+    req: Request<{ id: string }>,
+    res: Response<ResponseData<{ _id: string; img: string }>>,
+    next: NextFunction
+  ) {
+    try {
+      const { id } = req.params;
 
-    // upadte 
-    static async update(req: Request<{ id: string }>, res: Response<ResponseData<{ id: number; img: string }>>, next: NextFunction) {
-        try {
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          message: "File is required",
+        });
+      }
 
-            // get id 
-            const id = req.params.id;
+      const response = await PamfletService.update(id, req.file.filename);
 
-            // cek file 
-            if (req.file === undefined) {
-                return res.status(400).json({
-                    success: false,
-                    message: "File is required"
-                })
-            }
-
-            // get service 
-            const response = await PamfletService.update(+id, req.file.filename);
-
-            return res.status(200).json({
-                success: true,
-                message: 'success update pamflet',
-                data: response
-            })
-        } catch (error) {
-            // error handler
-            console.log(error)
-            next(error)
-        }
+      return res.status(200).json({
+        success: true,
+        message: "Pamflet updated successfully",
+        data: response,
+      });
+    } catch (error) {
+      console.log(error);
+      next(error);
     }
+  }
 
-    // delete 
-    static async delete(req: Request<{ id: string }>, res: Response<ResponseData<{ id: number; img: string }>>, next: NextFunction) {
-        try {
-            // get id 
-            const id = req.params.id;
+  // delete
+  static async delete(
+    req: Request<{ id: string }>,
+    res: Response<ResponseData<{ _id: string; img: string }>>,
+    next: NextFunction
+  ) {
+    try {
+      const { id } = req.params;
 
-            // get service 
-            const response = await PamfletService.delete(id);
+      const response = await PamfletService.delete(id);
 
-            return res.status(200).json({
-                success: true,
-                message: 'success delete pamflet',
-                data: response
-            })
-        } catch (error) {
-            // error handler
-            console.log(error)
-            next(error)
-        }
+      return res.status(200).json({
+        success: true,
+        message: "Pamflet deleted successfully",
+        data: response,
+      });
+    } catch (error) {
+      console.log(error);
+      next(error);
     }
+  }
 }
