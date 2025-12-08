@@ -8,7 +8,6 @@ import cookieParser from "cookie-parser";
 import path from "path";
 
 // Middlewares
-import { errorMiddlewate } from "./middlewares/error-middleware";
 
 // Routes
 import authRouter from "./routes/auth.route";
@@ -19,6 +18,7 @@ import studentRouter from "./routes/student.route";
 import alumniRoute from "./routes/alumni.route";
 import pamfletRoute from "./routes/pamflet.route";
 import connect from "./lib/db";
+import { errorMiddleware } from "./middlewares/error-middleware";
 
 async function initializeDB() {
   try {
@@ -62,7 +62,7 @@ async function initializeDB() {
     app.use("/api/pamflet", pamfletRoute);
 
     // 9. Error middleware
-    app.use(errorMiddlewate);
+    app.use(errorMiddleware);
 
     // 10. Run server
     const port = process.env.PORT || 3001;
