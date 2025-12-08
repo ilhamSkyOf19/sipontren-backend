@@ -1,5 +1,5 @@
 import { NextFunction, Response, Request } from "express";
-import { TokenRequest, ResponseData, ResponseMessage } from "../types/types";
+import { ResponseData, ResponseMessage } from "../types/types";
 import {
   CreateUstadType,
   ResponseUstadType,
@@ -13,7 +13,7 @@ import { FileService } from "../services/file.service";
 export class UstadController {
   // create
   static async create(
-    req: TokenRequest<{}, {}, CreateUstadType>,
+    req: Request<{}, {}, CreateUstadType>,
     res: Response<ResponseData<ResponseUstadType>>,
     next: NextFunction
   ) {
@@ -77,7 +77,7 @@ export class UstadController {
 
   // read detail
   static async detail(
-    req: TokenRequest<{ _id: string }>,
+    req: Request<{ _id: string }>,
     res: Response<ResponseData<ResponseUstadType>>,
     next: NextFunction
   ) {
@@ -138,7 +138,7 @@ export class UstadController {
 
   // delete
   static async delete(
-    req: TokenRequest<{ id: string }>,
+    req: Request<{ id: string }>,
     res: Response<ResponseMessage>,
     next: NextFunction
   ) {

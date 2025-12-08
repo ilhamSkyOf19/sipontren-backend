@@ -68,7 +68,7 @@ export class AuthController {
 
   // logout
   static async logout(
-    req: Request,
+    _req: Request,
     res: Response<ResponseMessage>,
     next: NextFunction
   ) {

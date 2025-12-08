@@ -4,7 +4,7 @@ import {
   ResponseNewsType,
   UpdateNewsType,
 } from "../models/news-model";
-import { ResponseData, ResponseMessage, TokenRequest } from "../types/types";
+import { ResponseData, ResponseMessage } from "../types/types";
 import { NewsService } from "../services/news.service";
 import { NewsValidation } from "../validations/news-validation";
 import { validation } from "../services/validation.service";
@@ -13,7 +13,7 @@ import { FileService } from "../services/file.service";
 export class NewsController {
   // CREATE ===================================================
   static async create(
-    req: TokenRequest<{}, {}, CreateNewsType>,
+    req: Request<{}, {}, CreateNewsType>,
     res: Response<ResponseData<ResponseNewsType>>,
     next: NextFunction
   ) {
@@ -62,7 +62,7 @@ export class NewsController {
 
   // READ DETAIL ==============================================
   static async detail(
-    req: TokenRequest<{ id: string }>,
+    req: Request<{ id: string }>,
     res: Response<ResponseData<ResponseNewsType>>,
     next: NextFunction
   ) {
@@ -90,7 +90,7 @@ export class NewsController {
 
   // UPDATE ====================================================
   static async update(
-    req: TokenRequest<{ id: string }>,
+    req: Request<{ id: string }>,
     res: Response<ResponseData<ResponseNewsType>>,
     next: NextFunction
   ) {
@@ -144,7 +144,7 @@ export class NewsController {
 
   // DELETE ====================================================
   static async delete(
-    req: TokenRequest<{ id: string }>,
+    req: Request<{ id: string }>,
     res: Response<ResponseMessage>,
     next: NextFunction
   ) {

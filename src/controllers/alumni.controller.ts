@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { TokenRequest, ResponseData, ResponseMessage } from "../types/types";
+import { ResponseData, ResponseMessage } from "../types/types";
 import {
   CreateAlumniType,
   ResponseAlumniType,
@@ -13,7 +13,7 @@ import { AlumniValidation } from "../validations/alumni-validation";
 export class AlumniController {
   // CREATE
   static async create(
-    req: TokenRequest<{}, {}, CreateAlumniType>,
+    req: Request<{}, {}, CreateAlumniType>,
     res: Response<ResponseData<ResponseAlumniType>>,
     next: NextFunction
   ) {
@@ -70,7 +70,7 @@ export class AlumniController {
 
   // DETAIL
   static async detail(
-    req: TokenRequest<{ id: string }>,
+    req: Request<{ id: string }>,
     res: Response<ResponseData<ResponseAlumniType>>,
     next: NextFunction
   ) {
@@ -130,7 +130,7 @@ export class AlumniController {
 
   // DELETE
   static async delete(
-    req: TokenRequest<{ id: string }>,
+    req: Request<{ id: string }>,
     res: Response<ResponseMessage>,
     next: NextFunction
   ) {
