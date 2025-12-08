@@ -1,16 +1,18 @@
-import express, { Router } from 'express'
-import { AdminController } from '../controllers/admin.controller';
-import { zodValidation } from '../middlewares/zod-middleware';
-import { CreateAdminType } from '../models/admin-model';
-import { AdminValidation } from '../validations/admin-validation';
-
+import express, { Router } from "express";
+import { AdminController } from "../controllers/admin.controller";
+import { zodValidation } from "../middlewares/zod-middleware";
+import { CreateAdminType } from "../models/admin-model";
+import { AdminValidation } from "../validations/admin-validation";
 
 // initialization router
 const adminRoute: Router = Router();
 
-// create 
-adminRoute.post('/create', zodValidation<CreateAdminType>(AdminValidation.CREATE), AdminController.create);
+// create
+adminRoute.post(
+  "/create",
+  zodValidation<Omit<CreateAdminType, "role">>(AdminValidation.CREATE),
+  AdminController.create
+);
 
-
-// export 
+// export
 export default adminRoute;
