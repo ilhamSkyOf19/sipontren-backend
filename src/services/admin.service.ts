@@ -1,26 +1,26 @@
-import prisma from "../lib/prismaClient";
-import { CreateAdminType, ResponseAdminType, toResponseAdminType } from "../models/admin-model";
-import bcrypt from 'bcrypt'
+import {
+  CreateAdminType,
+  ResponseAdminType,
+  toResponseAdminType,
+} from "../models/admin-model";
+import bcrypt from "bcrypt";
+import { AdminModel } from "../schemas/admin.schema";
 
 export class AdminService {
-    // create 
-    static async create(req: CreateAdminType): Promise<ResponseAdminType> {
+  // CREATE ADMIN
+  static async create(req: CreateAdminType): Promise<ResponseAdminType> {
+    // Hash password
+    const passwordHash = bcrypt.hashSync(req.password, 10);
 
-        // hash password
-        const passwordHash = bcrypt.hashSync(req.password, 10)
+    // Create to DB
+    const admin = await AdminModel.create({
+      name: req.name,
+      email: req.email,
+      password: passwordHash,
+      role: "admin",
+    });
 
-
-        // get response 
-        const response = await prisma.admin.create({
-            data: {
-                name: req.name,
-                email: req.email,
-                password: passwordHash
-            }
-        })
-
-        // return
-        return toResponseAdminType(response)
-    }
-
+    // Convert to response format
+    return toResponseAdminType(admin);
+  }
 }

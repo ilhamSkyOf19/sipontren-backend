@@ -1,193 +1,161 @@
 import { NextFunction, Request, Response } from "express";
-import { CreateNewsType, ResponseNewsType, UpdateNewsType } from "../models/news-model";
+import {
+  CreateNewsType,
+  ResponseNewsType,
+  UpdateNewsType,
+} from "../models/news-model";
 import { ResponseData, ResponseMessage, TokenRequest } from "../types/types";
 import { NewsService } from "../services/news.service";
 import { NewsValidation } from "../validations/news-validation";
-import { zodValidation } from "../middlewares/zod-middleware";
 import { validation } from "../services/validation.service";
 import { FileService } from "../services/file.service";
 
 export class NewsController {
+  // CREATE ===================================================
+  static async create(
+    req: TokenRequest<{}, {}, CreateNewsType>,
+    res: Response<ResponseData<ResponseNewsType>>,
+    next: NextFunction
+  ) {
+    try {
+      const rawBody = req.body;
 
-    // create 
-    static async create(req: TokenRequest<{}, {}, CreateNewsType>, res: Response<ResponseData<ResponseNewsType>>, next: NextFunction) {
-        try {
+      if (!req.file) {
+        return res.status(400).json({
+          success: false,
+          message: "File is required",
+        });
+      }
 
-            // get body 
-            const rawBody = req.body
+      const body = validation<CreateNewsType>(NewsValidation.CREATE, rawBody);
 
-            // cek file 
-            if (req.file === undefined) {
-                return res.status(400).json({
-                    success: false,
-                    message: "File is required"
-                })
-            }
+      if (!body.success) {
+        await FileService.deleteFile(req.file.path);
+        return res.status(400).json({
+          success: false,
+          message: body.message,
+        });
+      }
 
+      const response = await NewsService.create(body.data, req.file.filename);
 
-            // cek body & validation 
-            const body = validation<CreateNewsType>(NewsValidation.CREATE, rawBody)
-
-            // cek validation 
-            if (!body.success) {
-                // cek file and deletezzz 
-                if (req.file) {
-                    await FileService.deleteFile(req.file?.path)
-                }
-
-                return res.status(400).json({
-                    success: false,
-                    message: body.message
-                })
-            }
-
-
-            // get service 
-            const response = await NewsService.create(body.data, req.file?.filename);
-
-
-            // return response 
-            return res.status(200).json(response)
-
-        } catch (error) {
-            // cek error 
-            next(error)
-        }
+      return res.status(201).json(response);
+    } catch (error) {
+      next(error);
     }
+  }
 
+  // READ ALL =================================================
+  static async read(
+    _req: Request,
+    res: Response<ResponseData<ResponseNewsType[]>>,
+    next: NextFunction
+  ) {
+    try {
+      const response = await NewsService.read();
 
-    // read
-    static async read(_req: Request, res: Response<ResponseData<ResponseNewsType[]>>, next: NextFunction) {
-        try {
-            // get service 
-            const response = await NewsService.read();
-
-
-            // return response 
-            return res.status(200).json(response)
-
-        } catch (error) {
-            // cek error 
-            next(error)
-        }
+      return res.status(200).json(response);
+    } catch (error) {
+      next(error);
     }
+  }
 
-    // read detail 
-    static async detail(req: TokenRequest<{ id: string }>, res: Response<ResponseData<ResponseNewsType>>, next: NextFunction) {
-        try {
+  // READ DETAIL ==============================================
+  static async detail(
+    req: TokenRequest<{ id: string }>,
+    res: Response<ResponseData<ResponseNewsType>>,
+    next: NextFunction
+  ) {
+    try {
+      const id = req.params.id; // tetap string untuk Mongoose
 
-            // get params id 
-            const id = req.params.id;
+      const response = await NewsService.detail(id);
 
+      if (!response.success) {
+        return res.status(400).json({
+          success: false,
+          message: response.message,
+        });
+      }
 
-            // get service 
-            const response = await NewsService.detail(Number(id));
-
-            // return response 
-            return res.status(200).json({
-                success: true,
-                message: "success read detail news",
-                data: response
-            })
-
-        } catch (error) {
-            // cek error
-            console.log(error);
-            next(error);
-        }
+      return res.status(200).json({
+        success: true,
+        message: "success read detail news",
+        data: response.data,
+      });
+    } catch (error) {
+      next(error);
     }
+  }
 
+  // UPDATE ====================================================
+  static async update(
+    req: TokenRequest<{ id: string }>,
+    res: Response<ResponseData<ResponseNewsType>>,
+    next: NextFunction
+  ) {
+    try {
+      const id = req.params.id;
 
-    // update detail 
-    static async update(req: TokenRequest<{ id: string }>, res: Response<ResponseData<ResponseNewsType>>, next: NextFunction) {
-        try {
+      // cek apakah news ada
+      const existing = await NewsService.detail(id);
+      if (!existing) {
+        if (req.file) await FileService.deleteFile(req.file.path);
 
-            // cek params id 
-            const id = req.params.id;
+        return res.status(404).json({
+          success: false,
+          message: "news not found",
+        });
+      }
 
-            // cek news 
-            const news = await NewsService.detail(Number(id));
+      const body = validation<UpdateNewsType>(NewsValidation.UPDATE, req.body);
 
-            // cek news 
-            if (!news) {
-                // cek file 
-                if (req.file) {
-                    await FileService.deleteFile(req.file?.path)
-                }
-                return res.status(400).json({
-                    success: false,
-                    message: 'news not found'
-                })
-            }
+      if (!body.success) {
+        if (req.file) await FileService.deleteFile(req.file.path);
 
-            // cek body 
-            const body = validation<UpdateNewsType>(NewsValidation.UPDATE, req.body);
+        return res.status(400).json({
+          success: false,
+          message: body.message,
+        });
+      }
 
+      const response = await NewsService.update(
+        id,
+        body.data,
+        req.file?.filename
+      );
 
-            // cek body
-            if (!body.success) {
-                // cek file 
-                if (req.file) {
-                    await FileService.deleteFile(req.file?.path)
-                }
+      if (!response.success) {
+        return res.status(400).json({
+          success: false,
+          message: response.message,
+        });
+      }
 
-                return res.status(400).json({
-                    success: false,
-                    message: body.message
-                })
-            }
-
-
-
-            // get service 
-            const response = await NewsService.update(Number(id), body.data, req.file?.filename);
-
-
-            // cek response 
-            if (!response.success) {
-                return res.status(400).json({
-                    success: false,
-                    message: ''
-                })
-            }
-
-
-            // return 
-            return res.status(200).json({
-                success: true,
-                message: 'succes updated',
-                data: response.data
-            })
-
-
-
-
-        } catch (error) {
-            // cek error 
-            console.log(error)
-            next(error)
-        }
+      return res.status(200).json({
+        success: true,
+        message: "success updated",
+        data: response.data,
+      });
+    } catch (error) {
+      next(error);
     }
+  }
 
+  // DELETE ====================================================
+  static async delete(
+    req: TokenRequest<{ id: string }>,
+    res: Response<ResponseMessage>,
+    next: NextFunction
+  ) {
+    try {
+      const id = req.params.id;
 
-    // delete 
-    static async delete(req: TokenRequest<{ id: string }>, res: Response<ResponseMessage>, next: NextFunction) {
-        try {
+      const response = await NewsService.delete(id);
 
-            // get params id 
-            const id = req.params.id;
-
-
-            // get service 
-            const response = await NewsService.delete(id);
-
-
-            // return response 
-            return res.status(200).json(response)
-
-        } catch (error) {
-            // cek error 
-            next(error)
-        }
+      return res.status(200).json(response);
+    } catch (error) {
+      next(error);
     }
+  }
 }

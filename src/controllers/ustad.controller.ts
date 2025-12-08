@@ -1,195 +1,149 @@
 import { NextFunction, Response, Request } from "express";
 import { TokenRequest, ResponseData, ResponseMessage } from "../types/types";
-import { CreateUstadType, ResponseUstadType, UpdateUstadType } from "../models/ustad-model";
+import {
+  CreateUstadType,
+  ResponseUstadType,
+  UpdateUstadType,
+} from "../models/ustad-model";
 import { UstadValidation } from "../validations/ustad-validation";
 import { UstadService } from "../services/ustad.service";
 import { validation } from "../services/validation.service";
 import { FileService } from "../services/file.service";
 
 export class UstadController {
+  // create
+  static async create(
+    req: TokenRequest<{}, {}, CreateUstadType>,
+    res: Response<ResponseData<ResponseUstadType>>,
+    next: NextFunction
+  ) {
+    try {
+      const rawBody = req.body;
 
-    // create
-    static async create(
-        req: TokenRequest<{}, {}, CreateUstadType>,
-        res: Response<ResponseData<CreateUstadType>>,
-        next: NextFunction
-    ) {
-        try {
-            // get body
-            const rawBody = req.body;
+      if (!req.file) {
+        return res
+          .status(400)
+          .json({ success: false, message: "File is required" });
+      }
 
+      const body = validation<CreateUstadType>(UstadValidation.CREATE, rawBody);
 
-            // cek file 
-            if (req.file === undefined) {
-                return res.status(400).json({
-                    success: false,
-                    message: "File is required"
-                });
-            }
+      if (!body.success) {
+        await FileService.deleteFile(req.file.path);
+        return res.status(400).json({ success: false, message: body.message });
+      }
 
-            // cek body & validation
-            const body = validation<CreateUstadType>(UstadValidation.CREATE, rawBody);
+      const response = await UstadService.create(body.data, req.file.filename);
 
-            // cek validation
-            if (!body.success) {
-                // cek file and delete 
-                if (req.file) {
-                    await FileService.deleteFile(req.file?.path)
-                }
-                return res.status(400).json({
-                    success: false,
-                    message: body.message
-                });
-            }
-
-            // get service
-            const response = await UstadService.create(body.data, req.file?.filename);
-
-            // return response
-            return res.status(200).json({
-                success: true,
-                message: "success created",
-                data: response
-            });
-
-        } catch (error) {
-            // error handler
-            console.log(error);
-            next(error);
-        }
+      return res.status(200).json({
+        success: true,
+        message: "success created",
+        data: response,
+      });
+    } catch (error) {
+      console.log(error);
+      next(error);
     }
+  }
 
+  // read
+  static async read(
+    _req: Request,
+    res: Response<ResponseData<ResponseUstadType[]>>,
+    next: NextFunction
+  ) {
+    try {
+      const response = await UstadService.read();
 
-    // read 
-    static async read(_req: Request, res: Response<ResponseData<ResponseUstadType[]>>, next: NextFunction) {
-        try {
-            // get service 
-            const response = await UstadService.read();
-
-            // return response
-            return res.status(200).json({
-                success: true,
-                message: "success read ustad",
-                data: response
-            });
-        } catch (error) {
-            // error handler
-            console.log(error);
-            next(error);
-        }
+      return res.status(200).json({
+        success: true,
+        message: "success read ustad",
+        data: response,
+      });
+    } catch (error) {
+      console.log(error);
+      next(error);
     }
+  }
 
+  // read detail
+  static async detail(
+    req: TokenRequest<{ _id: string }>,
+    res: Response<ResponseData<ResponseUstadType>>,
+    next: NextFunction
+  ) {
+    try {
+      const _id = req.params._id;
 
-    // read detail 
-    static async detail(req: TokenRequest<{ id: string }>, res: Response<ResponseData<CreateUstadType>>, next: NextFunction) {
-        try {
-            // get params id 
-            const id = req.params.id;
+      const response = await UstadService.detail(_id);
 
-            // get service 
-            const response = await UstadService.detail(Number(id));
+      if (!response.success) return res.status(400).json(response);
 
-            // cek response 
-            if (!response.success) {
-                return res.status(400).json(response);
-            }
-
-
-
-            // return response 
-            return res.status(200).json(response)
-
-        } catch (error) {
-            // cek error
-            console.log(error);
-            next(error);
-        }
+      return res.status(200).json(response);
+    } catch (error) {
+      console.log(error);
+      next(error);
     }
+  }
 
+  // update
+  static async update(
+    req: Request<{ id: string }, {}, UpdateUstadType>,
+    res: Response<ResponseData<ResponseUstadType>>,
+    next: NextFunction
+  ) {
+    try {
+      const _id = req.params.id;
 
-    // update 
-    static async update(req: Request<{ id: string }, {}, UpdateUstadType>, res: Response<ResponseData<ResponseUstadType>>, next: NextFunction) {
+      const ustad = await UstadService.detail(_id);
 
+      if (!ustad.success) {
+        if (req.file) await FileService.deleteFile(req.file.path);
+        return res.status(400).json(ustad);
+      }
 
-        try {
-            // get id params
-            const id = req.params.id;
+      const body = validation<UpdateUstadType>(
+        UstadValidation.UPDATE,
+        req.body
+      );
 
+      if (!body.success) {
+        if (req.file) await FileService.deleteFile(req.file.path);
+        return res.status(400).json({ success: false, message: body.message });
+      }
 
-            // cek ustad 
-            const ustad = await UstadService.detail(Number(id));
+      const response = await UstadService.update(
+        _id,
+        req.file?.filename ?? "",
+        body.data
+      );
 
-            // cek ustad 
-            if (!ustad.success) {
-                // cek file 
-                if (req.file) {
-                    await FileService.deleteFile(req.file?.path)
-                }
+      if (!response.success) return res.status(400).json(response);
 
-                return res.status(400).json(ustad);
-            }
-
-
-            // get body 
-            const body = validation<UpdateUstadType>(UstadValidation.UPDATE, req.body);
-
-
-            // cek validation 
-            if (!body.success) {
-                // cek file 
-                if (req.file) {
-                    await FileService.deleteFile(req.file?.path)
-                }
-
-                // return
-                return res.status(400).json({
-                    success: false,
-                    message: body.message
-                });
-            }
-
-
-            // get service 
-            const response = await UstadService.update(Number(id), req.file?.filename ?? '', body.data);
-
-            // cek response 
-            if (!response.success) {
-                return res.status(400).json(response);
-            }
-
-            // return response 
-            return res.status(200).json(response)
-
-
-
-        } catch (error) {
-            // cek error 
-            console.log(error);
-            next(error);
-        }
+      return res.status(200).json(response);
+    } catch (error) {
+      console.log(error);
+      next(error);
     }
+  }
 
-    // delete 
-    static async delete(req: TokenRequest<{ id: string }>, res: Response<ResponseMessage>, next: NextFunction) {
-        try {
-            // get params id 
-            const id = req.params.id;
+  // delete
+  static async delete(
+    req: TokenRequest<{ id: string }>,
+    res: Response<ResponseMessage>,
+    next: NextFunction
+  ) {
+    try {
+      const _id = req.params.id;
 
-            // get service 
-            const response = await UstadService.delete(Number(id));
+      const response = await UstadService.delete(_id);
 
-            // cek response 
-            if (!response.success) {
-                return res.status(400).json(response);
-            }
+      if (!response.success) return res.status(400).json(response);
 
-            // return response 
-            return res.status(200).json(response)
-
-        } catch (error) {
-            // cek error 
-            console.log(error);
-            next(error);
-        }
+      return res.status(200).json(response);
+    } catch (error) {
+      console.log(error);
+      next(error);
     }
+  }
 }

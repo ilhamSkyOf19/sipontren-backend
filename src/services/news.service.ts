@@ -1,154 +1,146 @@
-import prisma from "../lib/prismaClient";
 import {
   CreateNewsType,
   ResponseNewsType,
-  toResponseNews,
   UpdateNewsType,
+  toResponseNews,
 } from "../models/news-model";
+import { NewsModel } from "../schemas/news.shcema";
 import { ResponseData, ResponseMessage } from "../types/types";
 import { FileService } from "./file.service";
 
 export class NewsService {
-  // create
+  // CREATE
   static async create(
     req: CreateNewsType,
     thumbnail: string
   ): Promise<ResponseData<ResponseNewsType>> {
-    // get response
-    const response = await prisma.news.create({
-      data: {
-        category: req.category,
-        title: req.title,
-        content: req.content,
-        thumbnail: thumbnail,
-      },
+    const created = await NewsModel.create({
+      category: req.category,
+      title: req.title,
+      content: req.content,
+      thumbnail,
     });
 
-    // url thumbnail
-    const url_thumbnail = `${process.env.BASE_URL}/uploads/news/${response.thumbnail}`;
+    // generate url
+    const url_thumbnail = `${process.env.BASE_URL}/uploads/news/${thumbnail}`;
 
     return {
       success: true,
-      message: "berhasil membuat news",
+      message: "Berhasil membuat news",
       data: toResponseNews({
-        ...response,
+        ...created.toObject(),
         url_thumbnail,
       }),
     };
   }
 
-  // read
+  // READ ALL
   static async read(): Promise<ResponseData<ResponseNewsType[]>> {
-    // response
-    const response = await prisma.news.findMany();
+    const newsList = await NewsModel.find().sort({ createdAt: -1 });
 
-    // initialization data
-    const data = response.map((news) => {
+    const data = newsList.map((news) => {
       const url_thumbnail = `${process.env.BASE_URL}/uploads/news/${news.thumbnail}`;
-      return {
-        ...news,
+      return toResponseNews({
+        ...news.toObject(),
         url_thumbnail,
-      };
+      });
     });
 
-    // return response
     return {
       success: true,
-      message: "berhasil membaca news",
-      data: data.map((news) => toResponseNews(news)),
+      message: "Berhasil membaca semua news",
+      data,
     };
   }
 
-  // read detail
-  static async detail(id: number): Promise<ResponseNewsType> {
-    // get news by id
-    const response = await prisma.news.findUniqueOrThrow({
-      where: {
-        id,
-      },
-    });
+  // DETAIL
+  static async detail(_id: string): Promise<ResponseData<ResponseNewsType>> {
+    const news = await NewsModel.findById(_id);
 
-    // return response
-    return toResponseNews(response);
-  }
-
-  // update
-  static async update(
-    id: number,
-    req: UpdateNewsType,
-    thumbnail: string | undefined
-  ): Promise<ResponseData<ResponseNewsType>> {
-    // cek news
-    const news = await this.detail(id);
-
-    // cek thumbnail
     if (!news) {
       return {
         success: false,
-        message: "news not found",
+        message: "News not found",
       };
     }
 
-    // cek thumbnail
-    if (thumbnail !== undefined) {
-      // delete file form path
-      await FileService.deleteFormPath(news.thumbnail, "news");
-    }
+    const url_thumbnail = `${process.env.BASE_URL}/uploads/news/${news.thumbnail}`;
 
-    // update news
-    const response = await prisma.news.update({
-      where: {
-        id,
-      },
-      data: {
-        category: req.category,
-        title: req.title,
-        content: req.content,
-        thumbnail: thumbnail,
-      },
-    });
-
-    // generate url thumbnail
-    const url_thumbnail = `${process.env.BASE_URL}/news/${response.thumbnail}`;
-
-    // return response
     return {
       success: true,
-      message: "berhasil update news",
+      message: "Berhasil mengambil detail news",
       data: toResponseNews({
-        ...response,
+        ...news.toObject(),
         url_thumbnail,
       }),
     };
   }
 
-  // delete
-  static async delete(id: string): Promise<ResponseMessage> {
-    // cek news
-    const news = await this.detail(Number(id));
+  // UPDATE
+  static async update(
+    _id: string,
+    req: UpdateNewsType,
+    thumbnail?: string
+  ): Promise<ResponseData<ResponseNewsType>> {
+    const existing = await NewsModel.findById(_id);
 
-    // cek news
-    if (!news) {
+    if (!existing) {
       return {
         success: false,
-        message: "news not found",
+        message: "News not found",
       };
     }
 
-    // delete news
-    await prisma.news.delete({
-      where: {
-        id: Number(id),
-      },
-    });
+    // Jika ada thumbnail baru → hapus lama
+    let finalThumbnail = existing.thumbnail;
+    if (thumbnail) {
+      await FileService.deleteFormPath(existing.thumbnail, "news");
+      finalThumbnail = thumbnail;
+    }
 
-    // delete file
+    // Update database
+    await NewsModel.updateOne(
+      { _id },
+      {
+        ...req,
+        thumbnail: finalThumbnail,
+      }
+    );
+
+    // Ambil data terbaru
+    const updated = await NewsModel.findById(_id);
+    const url_thumbnail = `${process.env.BASE_URL}/uploads/news/${finalThumbnail}`;
+
+    return {
+      success: true,
+      message: "Berhasil update news",
+      data: toResponseNews({
+        ...updated!.toObject(),
+        url_thumbnail,
+      }),
+    };
+  }
+
+  // DELETE
+  static async delete(_id: string): Promise<ResponseMessage> {
+    const news = await NewsModel.findById(_id);
+
+    if (!news) {
+      return {
+        success: false,
+        message: "News not found",
+      };
+    }
+
+    // Delete DB
+    await NewsModel.deleteOne({ _id });
+
+    // Delete file
     await FileService.deleteFormPath(news.thumbnail, "news");
 
-    // return response
     return {
       success: true,
-      message: "berhasil delete news",
+      message: "Berhasil delete news",
     };
   }
 }

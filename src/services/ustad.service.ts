@@ -1,175 +1,104 @@
-import prisma from "../lib/prismaClient";
-import { CreateUstadType, ResponseUstadType, toResponseUstadType, UpdateUstadType } from "../models/ustad-model";
+import {
+  IUstad,
+  CreateUstadType,
+  UpdateUstadType,
+  ResponseUstadType,
+  toResponseUstadType,
+} from "../models/ustad-model";
+import UstadModel from "../schemas/ustad.schema";
 import { ResponseData, ResponseMessage } from "../types/types";
 import { FileService } from "./file.service";
 
 export class UstadService {
+  // create
+  static async create(
+    req: CreateUstadType,
+    ustad_img: string
+  ): Promise<ResponseUstadType> {
+    const ustad = new UstadModel({
+      ...req,
+      ustad_img,
+      url_ustad_img: `${process.env.BASE_URL}/ustad_img/${ustad_img}`,
+    });
 
-    // create 
-    static async create(req: CreateUstadType, ustad_img: string): Promise<ResponseUstadType> {
+    await ustad.save();
 
-        // get response 
-        const response = await prisma.ustad.create({
-            data: {
-                name: req.name,
-                jenis_kelamin: req.jenis_kelamin,
-                tempat_lahir: req.tempat_lahir,
-                tanggal_lahir: req.tanggal_lahir,
-                alamat: req.alamat,
-                no_telepon: req.no_telepon,
-                jabatan: req.jabatan,
-                ustad_img: ustad_img
-            }
-        });
+    return toResponseUstadType(ustad.toObject() as IUstad);
+  }
 
+  // read all
+  static async read(): Promise<ResponseUstadType[]> {
+    const ustads = await UstadModel.find().exec();
 
-        // generate url 
-        const url_ustad_img = `${process.env.BASE_URL}/ustad_img/${response.ustad_img}`
+    return ustads.map((ustad) => {
+      ustad.url_ustad_img = `${process.env.BASE_URL}/ustad_img/${ustad.ustad_img}`;
+      return toResponseUstadType(ustad.toObject() as IUstad);
+    });
+  }
 
+  // detail
+  static async detail(_id: string): Promise<ResponseData<ResponseUstadType>> {
+    const ustad = await UstadModel.findById(_id).exec();
 
-        // response 
-        return toResponseUstadType({
-            ...response,
-            url_ustad_img
-        });
+    // cek
+    console.log(ustad);
+
+    if (!ustad) {
+      return { success: false, message: "Ustad not found" };
     }
 
+    ustad.url_ustad_img = `${process.env.BASE_URL}/ustad_img/${ustad.ustad_img}`;
 
-    // read
-    static async read(): Promise<ResponseUstadType[]> {
+    return {
+      success: true,
+      message: "success read detail ustad",
+      data: toResponseUstadType(ustad.toObject() as IUstad),
+    };
+  }
 
-        const response = await prisma.ustad.findMany();
+  // update
+  static async update(
+    _id: string,
+    ustad_img: string | undefined,
+    req: UpdateUstadType
+  ): Promise<ResponseData<ResponseUstadType>> {
+    const ustad = await this.detail(_id);
+    if (!ustad.success) return ustad;
 
-        // generate url
-        const data: ResponseUstadType[] = response.map((item: Omit<ResponseUstadType, 'url_ustad_img'>) => {
-
-            // generate url 
-            const url_ustad_img = `${process.env.BASE_URL}/ustad_img/${item.ustad_img}`
-            // return 
-            return {
-                ...item,
-                url_ustad_img
-            }
-
-
-        })
-
-
-        // return 
-        return data.map((ustad) => toResponseUstadType(ustad))
+    if (ustad_img) {
+      await FileService.deleteFormPath(ustad.data.ustad_img, "ustad_img");
+      req.ustad_img = ustad_img;
     }
 
+    const updated = await UstadModel.findByIdAndUpdate(
+      _id,
+      {
+        ...req,
+        url_ustad_img: req.ustad_img
+          ? `${process.env.BASE_URL}/ustad_img/${req.ustad_img}`
+          : ustad.data.url_ustad_img,
+      },
+      { new: true }
+    ).exec();
 
-    // read detial
-    static async detail(id: number): Promise<ResponseData<ResponseUstadType>> {
+    return {
+      success: true,
+      message: "success update ustad",
+      data: toResponseUstadType(updated!.toObject() as IUstad),
+    };
+  }
 
-        // get response 
-        const response = await prisma.ustad.findFirst({
-            where: {
-                id
-            }
-        })
+  // delete
+  static async delete(_id: string): Promise<ResponseMessage> {
+    const ustad = await this.detail(_id);
+    if (!ustad.success) return ustad;
 
-        // cek response 
-        if (!response) return {
-            success: false,
-            message: "Ustad not found",
-        }
+    await FileService.deleteFormPath(ustad.data.ustad_img, "ustad_img");
+    await UstadModel.findByIdAndDelete(_id).exec();
 
-        // generate url thumbnail 
-        const url_ustad_img = `${process.env.BASE_URL}/ustad_img/${response.ustad_img}`
-
-
-        // return
-        return {
-            success: true,
-            message: "success read detail ustad",
-            data: toResponseUstadType({
-                ...response,
-                url_ustad_img
-            })
-        }
-    }
-
-
-    // update 
-    static async update(id: number, ustad_img: string, req: UpdateUstadType): Promise<ResponseData<ResponseUstadType>> {
-
-        // get ustad 
-        const ustad = await this.detail(id);
-
-
-        // cek ustad 
-        if (!ustad.success) return ustad;
-
-
-        // cek file 
-        if (ustad_img) {
-            // delete file 
-            await FileService.deleteFormPath(ustad.data.ustad_img, 'ustad_img');
-        }
-
-
-        // update 
-        const response = await prisma.ustad.update({
-            where: {
-                id
-            },
-            data: {
-                ...req,
-                ustad_img: ustad_img ? ustad_img : ustad.data.ustad_img
-            }
-        })
-
-
-        // generate url img ustad
-        const url_ustad_img = `${process.env.BASE_URL}/ustad_img/${response.ustad_img}`
-
-
-        // return
-        return {
-            success: true,
-            message: "success update ustad",
-            data: toResponseUstadType({
-                ...response,
-                url_ustad_img
-            })
-        }
-
-    }
-
-
-    // delete 
-    static async delete(id: number): Promise<ResponseMessage> {
-
-        // get ustad 
-        const ustad = await this.detail(id);
-
-        // cek ustad 
-        if (!ustad.success) return ustad;
-
-
-        // delete file 
-        await FileService.deleteFormPath(ustad.data.ustad_img, 'ustad_img');
-
-
-        // delete ustad 
-        await prisma.ustad.delete({
-            where: {
-                id
-            }
-        })
-
-
-        // return 
-        return {
-            success: true,
-            message: "success delete ustad"
-        }
-
-    }
-
-
-
-
+    return {
+      success: true,
+      message: "success delete ustad",
+    };
+  }
 }

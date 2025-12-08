@@ -1,28 +1,20 @@
-// payload 
+// payload
 export type PayloadType = {
-    id: number;
-    email: string;
-    name: string;
-    role: 'admin'
-}
+  id: string;
+  email: string;
+  name: string;
+  role: "admin";
+};
 
-
-
-
-
-// register 
+// register
 export type RegisterType = {
-    name: string;
-    email: string;
-    password: string;
-}
-
-
+  name: string;
+  email: string;
+  password: string;
+};
 
 // login
 export type LoginType = {
-    email: string;
-    password: string;
-}
-
-
+  email: string;
+  password: string;
+};

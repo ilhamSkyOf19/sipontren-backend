@@ -1,102 +1,102 @@
-import prisma from "../lib/prismaClient";
-import { CreateAlumniType, ResponseAlumniType, toResponseAlumniType, UpdateAlumniType } from "../models/alumni-model";
+import {
+  IAlumni,
+  CreateAlumniType,
+  UpdateAlumniType,
+  ResponseAlumniType,
+  toResponseAlumniType,
+} from "../models/alumni-model";
+import AlumniModel from "../schemas/alumni.schema";
 import { ResponseData, ResponseMessage } from "../types/types";
 import { FileService } from "./file.service";
 
 export class AlumniService {
+  // CREATE
+  static async create(
+    req: CreateAlumniType,
+    img_alumni: string
+  ): Promise<ResponseAlumniType> {
+    const response: IAlumni = await AlumniModel.create({
+      name: req.name,
+      angkatan: req.angkatan,
+      description: req.description,
+      img_alumni,
+    });
 
-    // create
-    static async create(req: CreateAlumniType, img_alumni: string): Promise<ResponseAlumniType> {
+    return toResponseAlumniType(response);
+  }
 
-        const response = await prisma.alumni.create({
-            data: {
-                name: req.name,
-                angkatan: req.angkatan,
-                description: req.description,
-                img_alumni
-            }
-        });
+  // READ ALL
+  static async read(): Promise<ResponseAlumniType[]> {
+    const response: IAlumni[] = await AlumniModel.find().sort({
+      createdAt: -1,
+    });
 
+    return response.map((item) => toResponseAlumniType(item));
+  }
 
-        return toResponseAlumniType({
-            ...response
-        });
+  // DETAIL
+  static async detail(_id: string): Promise<ResponseData<ResponseAlumniType>> {
+    const response = await AlumniModel.findById(_id);
+
+    if (!response) {
+      return {
+        success: false,
+        message: "Alumni not found",
+      };
     }
 
-    // read
-    static async read(): Promise<ResponseAlumniType[]> {
-        const response = await prisma.alumni.findMany();
+    return {
+      success: true,
+      message: "Success read detail alumni",
+      data: toResponseAlumniType(response),
+    };
+  }
 
-        const data = response.map((alumni) => ({
-            ...alumni
-        }))
-        return data.map((alumni) => toResponseAlumniType(alumni));
+  // UPDATE
+  static async update(
+    _id: string,
+    img_alumni: string,
+    req: UpdateAlumniType
+  ): Promise<ResponseData<ResponseAlumniType>> {
+    const alumni = await this.detail(_id);
+    if (!alumni.success) return alumni;
+
+    const oldImage = alumni.data.img_alumni;
+
+    // Jika ada gambar baru → hapus file lama
+    if (img_alumni) {
+      await FileService.deleteFormPath(oldImage, "img_alumni");
     }
 
-    // detail
-    static async detail(id: number): Promise<ResponseData<ResponseAlumniType>> {
-        const response = await prisma.alumni.findFirst({
-            where: { id }
-        });
+    const response = await AlumniModel.findByIdAndUpdate(
+      _id,
+      {
+        ...req,
+        img_alumni: img_alumni || oldImage,
+      },
+      { new: true }
+    );
 
-        if (!response) return {
-            success: false,
-            message: "Alumni not found",
-        };
+    return {
+      success: true,
+      message: "Success update alumni",
+      data: toResponseAlumniType(response!),
+    };
+  }
 
+  // DELETE
+  static async delete(_id: string): Promise<ResponseMessage> {
+    const alumni = await this.detail(_id);
+    if (!alumni.success) return alumni;
 
-        return {
-            success: true,
-            message: "Success read detail alumni",
-            data: toResponseAlumniType({
-                ...response,
-            })
-        };
-    }
+    // Hapus file gambar
+    await FileService.deleteFormPath(alumni.data.img_alumni, "img_alumni");
 
-    // update
-    static async update(id: number, img_alumni: string, req: UpdateAlumniType): Promise<ResponseData<ResponseAlumniType>> {
-        const alumni = await this.detail(id);
+    await AlumniModel.findByIdAndDelete(_id);
 
-        if (!alumni.success) return alumni;
-
-        // delete old file if new one provided
-        if (img_alumni) {
-            await FileService.deleteFormPath(alumni.data.img_alumni, 'img_alumni');
-        }
-
-        const response = await prisma.alumni.update({
-            where: { id },
-            data: {
-                ...req,
-                img_alumni: img_alumni ? img_alumni : alumni.data.img_alumni
-            }
-        });
-
-
-        return {
-            success: true,
-            message: "Success update alumni",
-            data: toResponseAlumniType({
-                ...response,
-            })
-        };
-    }
-
-    // delete
-    static async delete(id: number): Promise<ResponseMessage> {
-        const alumni = await this.detail(id);
-
-        if (!alumni.success) return alumni;
-
-        // delete file
-        await FileService.deleteFormPath(alumni.data.img_alumni, 'img_alumni');
-
-        await prisma.alumni.delete({ where: { id } });
-
-        return {
-            success: true,
-            message: "Success delete alumni"
-        };
-    }
+    return {
+      success: true,
+      message: "Success delete alumni",
+    };
+  }
 }

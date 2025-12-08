@@ -1,38 +1,45 @@
-import { News } from "../generated/prisma";
+// src/models/news-model.ts
 
-// create 
+export type INews = {
+  _id: string; // MongoDB ObjectId (string)
+  category: "berita" | "artikel";
+  title: string;
+  content: string;
+  thumbnail: string;
+  url_thumbnail?: string;
+  createdAt: Date; // otomatis dari Mongoose timestamps
+  updatedAt: Date;
+};
+
+// create
 export type CreateNewsType = {
-    category: 'berita' | 'artikel',
-    title: string,
-    content: string,
-}
+  category: "berita" | "artikel";
+  title: string;
+  content: string;
+};
 
-
-// update 
+// update
 export type UpdateNewsType = Partial<CreateNewsType>;
 
-
-// response 
+// response
 export type ResponseNewsType = CreateNewsType & {
-    id: number,
-    thumbnail: string,
-    url_thumbnail?: string
-    createdAt: Date,
-    updatedAt: Date
-}
+  _id: string;
+  thumbnail: string;
+  url_thumbnail?: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
-
-
-// response to response 
-export const toResponseNews = (news: News & { url_thumbnail?: string }): ResponseNewsType => {
-    return {
-        id: news.id,
-        category: news.category,
-        title: news.title,
-        content: news.content,
-        url_thumbnail: news.url_thumbnail,
-        thumbnail: news.thumbnail,
-        createdAt: news.createdAt,
-        updatedAt: news.updatedAt
-    }
-}
+// to response
+export const toResponseNews = (news: INews): ResponseNewsType => {
+  return {
+    _id: news._id,
+    category: news.category,
+    title: news.title,
+    content: news.content,
+    thumbnail: news.thumbnail,
+    url_thumbnail: news.url_thumbnail,
+    createdAt: news.createdAt,
+    updatedAt: news.updatedAt,
+  };
+};
