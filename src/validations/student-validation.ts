@@ -20,7 +20,7 @@ export class StudentValidation {
       alamat_sekolah_asal: z.string(),
       nama_lengkap_ayah: z.string(),
       nama_lengkap_ibu: z.string(),
-      nama_lengkap_wali: z.string(),
+      nama_lengkap_wali: z.string().optional(),
       no_telepon: z.string(),
     })
     .strict() as ZodType<CreateStudentType>;

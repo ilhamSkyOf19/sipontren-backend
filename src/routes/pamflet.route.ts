@@ -22,6 +22,9 @@ pamfletRoute.post(
 // read
 pamfletRoute.get("/read", PamfletController.read);
 
+// read detail
+pamfletRoute.get("/detail/:id", tokenMiddleware, PamfletController.readDetail);
+
 // update
 pamfletRoute.patch(
   "/update/:id",

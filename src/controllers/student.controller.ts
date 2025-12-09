@@ -59,10 +59,12 @@ export class StudentController {
     next: NextFunction
   ) {
     try {
-      const body = validation<CreateStudentType>(
-        StudentValidation.CREATE,
-        req.body
-      );
+      const body = validation<CreateStudentType>(StudentValidation.CREATE, {
+        ...req.body,
+        anak_ke: Number(req.body.anak_ke),
+        jumlah_saudara: Number(req.body.jumlah_saudara),
+        usia: Number(req.body.usia),
+      });
 
       if (!body.success) {
         if (req.files && !Array.isArray(req.files)) {
@@ -123,10 +125,12 @@ export class StudentController {
           .json({ success: false, message: "student not found" });
       }
 
-      const body = validation<UpdateStudentType>(
-        StudentValidation.UPDATE,
-        req.body
-      );
+      const body = validation<UpdateStudentType>(StudentValidation.UPDATE, {
+        ...req.body,
+        anak_ke: Number(req.body.anak_ke),
+        jumlah_saudara: Number(req.body.jumlah_saudara),
+        usia: Number(req.body.usia),
+      });
       if (!body.success) {
         if (req.files && !Array.isArray(req.files)) {
           const files = req.files as Record<string, Express.Multer.File[]>;
@@ -186,12 +190,10 @@ export class StudentController {
     try {
       const { name } = req.query;
       if (!name || typeof name !== "string") {
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: "Name is required and must be a string",
-          });
+        return res.status(400).json({
+          success: false,
+          message: "Name is required and must be a string",
+        });
       }
 
       const response = await StudentService.searchByName(name);

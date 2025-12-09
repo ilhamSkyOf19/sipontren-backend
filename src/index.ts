@@ -45,7 +45,7 @@ async function initializeDB() {
     app.use(express.urlencoded({ extended: true }));
 
     // 6. Public folder
-    app.use(express.static(path.join(__dirname, "public")));
+    app.use(express.static(path.join(__dirname, "../public")));
 
     // 7. Test route
     app.get("/", (_req, res) => {

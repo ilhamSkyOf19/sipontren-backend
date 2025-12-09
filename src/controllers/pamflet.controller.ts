@@ -50,6 +50,31 @@ export class PamfletController {
     }
   }
 
+  // read detial
+  static async readDetail(
+    req: Request<{ id: string }>,
+    res: Response<ResponseData<{ _id: string; img: string }>>,
+    next: NextFunction
+  ) {
+    try {
+      // get id from params
+      const { id } = req.params;
+
+      // call service
+      const response = await PamfletService.detail(id);
+
+      // return response
+      return res.status(200).json({
+        success: true,
+        message: "Pamflet detail",
+        data: response,
+      });
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+
   // update
   static async update(
     req: Request<{ id: string }>,

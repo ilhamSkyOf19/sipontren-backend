@@ -77,12 +77,12 @@ export class UstadController {
 
   // read detail
   static async detail(
-    req: Request<{ _id: string }>,
+    req: Request<{ id: string }>,
     res: Response<ResponseData<ResponseUstadType>>,
     next: NextFunction
   ) {
     try {
-      const _id = req.params._id;
+      const _id = req.params.id;
 
       const response = await UstadService.detail(_id);
 

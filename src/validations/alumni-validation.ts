@@ -10,14 +10,12 @@ export class AlumniValidation {
       description: z
         .string()
         .min(5, { message: "deskripsi minimal 5 karakter" }),
-      img_alumni: z.string(),
     })
-    .strict() as ZodType<CreateAlumniType>;
+    .strict() as ZodType<Omit<CreateAlumniType, "img_alumni">>;
 
   // UPDATE – semua field optional kecuali _id
   static readonly UPDATE = z
     .object({
-      _id: z.string(),
       name: z
         .string()
         .min(3, { message: "nama minimal 3 karakter" })
@@ -30,7 +28,6 @@ export class AlumniValidation {
         .string()
         .min(5, { message: "deskripsi minimal 5 karakter" })
         .optional(),
-      img_alumni: z.string().optional(),
     })
-    .strict() as ZodType<UpdateAlumniType>;
+    .strict() as ZodType<Omit<UpdateAlumniType, "img_alumni" | "_id">>;
 }
