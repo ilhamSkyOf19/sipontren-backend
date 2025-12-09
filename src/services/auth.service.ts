@@ -1,7 +1,7 @@
 import { LoginType, PayloadType } from "../models/auth-model";
 import { AdminModel } from "../schemas/admin.schema";
 import { ResponseData } from "../types/types";
-import bcrypt from "bcrypt";
+import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 export class AuthService {
@@ -19,7 +19,7 @@ export class AuthService {
     }
 
     // compare password
-    const isMatch = await bcrypt.compare(req.password, admin.password);
+    const isMatch = await bcryptjs.compare(req.password, admin.password);
     if (!isMatch) {
       return {
         success: false,
