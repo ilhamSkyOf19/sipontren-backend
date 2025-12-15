@@ -19,6 +19,8 @@ import alumniRoute from "./routes/alumni.route";
 import pamfletRoute from "./routes/pamflet.route";
 import connect from "./lib/db";
 import { errorMiddleware } from "./middlewares/error-middleware";
+import bannerRoute from "./routes/banner.route";
+import fasilitasRoute from "./routes/fasilitas.route";
 
 async function initializeDB() {
   try {
@@ -32,7 +34,7 @@ async function initializeDB() {
     // 3. CORS
     app.use(
       cors({
-        origin: true,
+        origin: "http://localhost:5173",
         credentials: true,
       })
     );
@@ -60,6 +62,8 @@ async function initializeDB() {
     app.use("/api/student", studentRouter);
     app.use("/api/alumni", alumniRoute);
     app.use("/api/pamflet", pamfletRoute);
+    app.use("/api/banner", bannerRoute);
+    app.use("/api/fasilitas", fasilitasRoute);
 
     // 9. Error middleware
     app.use(errorMiddleware);

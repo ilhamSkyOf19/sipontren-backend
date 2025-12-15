@@ -25,7 +25,7 @@ export class AlumniController {
         });
       }
 
-      const body = validation<CreateAlumniType>(
+      const body = validation<Omit<CreateAlumniType, "img_alumni">>(
         AlumniValidation.CREATE,
         req.body
       );
@@ -103,7 +103,7 @@ export class AlumniController {
         return res.status(400).json(alumni);
       }
 
-      const body = validation<UpdateAlumniType>(
+      const body = validation<Omit<UpdateAlumniType, "img_alumni" | "_id">>(
         AlumniValidation.UPDATE,
         req.body
       );

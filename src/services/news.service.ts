@@ -36,7 +36,20 @@ export class NewsService {
 
   // READ ALL
   static async read(): Promise<ResponseData<ResponseNewsType[]>> {
-    const newsList = await NewsModel.find().sort({ createdAt: -1 });
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+
+    const endOfToday = new Date();
+    endOfToday.setHours(23, 59, 59, 999);
+
+    const newsList = await NewsModel.find({
+      createdAt: {
+        $gte: startOfToday,
+        $lte: endOfToday,
+      },
+    })
+      .sort({ createdAt: -1 })
+      .limit(8);
 
     const data = newsList.map((news) => {
       const url_thumbnail = `${process.env.BASE_URL}/uploads/news/${news.thumbnail}`;

@@ -12,7 +12,7 @@ import { FileService } from "./file.service";
 export class AlumniService {
   // CREATE
   static async create(
-    req: CreateAlumniType,
+    req: Omit<CreateAlumniType, "img_alumni">,
     img_alumni: string
   ): Promise<ResponseAlumniType> {
     const response: IAlumni = await AlumniModel.create({
@@ -27,9 +27,11 @@ export class AlumniService {
 
   // READ ALL
   static async read(): Promise<ResponseAlumniType[]> {
-    const response: IAlumni[] = await AlumniModel.find().sort({
-      createdAt: -1,
-    });
+    const response: IAlumni[] = await AlumniModel.find()
+      .sort({
+        createdAt: -1,
+      })
+      .limit(10);
 
     return response.map((item) => toResponseAlumniType(item));
   }
@@ -56,7 +58,7 @@ export class AlumniService {
   static async update(
     _id: string,
     img_alumni: string,
-    req: UpdateAlumniType
+    req: Omit<UpdateAlumniType, "img_alumni" | "_id">
   ): Promise<ResponseData<ResponseAlumniType>> {
     const alumni = await this.detail(_id);
     if (!alumni.success) return alumni;
