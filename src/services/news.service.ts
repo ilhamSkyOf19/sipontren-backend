@@ -1,5 +1,6 @@
 import {
   CreateNewsType,
+  NewsFilterType,
   ResponseNewsType,
   UpdateNewsType,
   toResponseNews,
@@ -62,6 +63,62 @@ export class NewsService {
     return {
       success: true,
       message: "Berhasil membaca semua news",
+      data,
+    };
+  }
+
+  static async readByFilter(
+    filter: NewsFilterType = "today"
+  ): Promise<ResponseData<ResponseNewsType[]>> {
+    const now = new Date();
+    let startDate: Date;
+    let endDate: Date = new Date();
+
+    // end date selalu sekarang / akhir hari
+    endDate.setHours(23, 59, 59, 999);
+
+    switch (filter) {
+      case "today":
+        startDate = new Date();
+        startDate.setHours(0, 0, 0, 0);
+        break;
+
+      case "week":
+        startDate = new Date();
+        startDate.setDate(now.getDate() - now.getDay()); // awal minggu (minggu)
+        startDate.setHours(0, 0, 0, 0);
+        break;
+
+      case "month":
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        startDate.setHours(0, 0, 0, 0);
+        break;
+
+      default:
+        startDate = new Date();
+        startDate.setHours(0, 0, 0, 0);
+    }
+
+    const newsList = await NewsModel.find({
+      createdAt: {
+        $gte: startDate,
+        $lte: endDate,
+      },
+    })
+      .sort({ createdAt: -1 })
+      .limit(8);
+
+    const data = newsList.map((news) => {
+      const url_thumbnail = `${process.env.BASE_URL}/uploads/news/${news.thumbnail}`;
+      return toResponseNews({
+        ...news.toObject(),
+        url_thumbnail,
+      });
+    });
+
+    return {
+      success: true,
+      message: "Berhasil membaca news",
       data,
     };
   }

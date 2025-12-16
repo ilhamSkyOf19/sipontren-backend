@@ -46,19 +46,19 @@ export class AuthController {
       }
 
       // set cookie
-      // res.cookie("token", response.data, {
-      //   httpOnly: true,
-      //   secure: true, // wajib true untuk sameSite: 'none'
-      //   sameSite: "none", // biar bisa lintas origin (ngrok / IP)
-      //   maxAge: 24 * 60 * 60 * 1000,
-      // });
-
       res.cookie("token", response.data, {
         httpOnly: true,
-        secure: false,
-        sameSite: "lax",
+        secure: true, // wajib true untuk sameSite: 'none'
+        sameSite: "none", // biar bisa lintas origin (ngrok / IP)
         maxAge: 24 * 60 * 60 * 1000,
       });
+
+      // res.cookie("token", response.data, {
+      //   httpOnly: true,
+      //   secure: false,
+      //   sameSite: "lax",
+      //   maxAge: 24 * 60 * 60 * 1000,
+      // });
 
       // return response
       return res.status(200).json({

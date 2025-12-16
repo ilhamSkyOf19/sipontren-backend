@@ -27,12 +27,7 @@ const studentUpload = upload.fields([
 ]);
 
 // create
-studentRouter.post(
-  "/create",
-  tokenMiddleware,
-  studentUpload,
-  StudentController.create
-);
+studentRouter.post("/create", studentUpload, StudentController.create);
 
 // read all (public)
 studentRouter.get("/read", StudentController.read);

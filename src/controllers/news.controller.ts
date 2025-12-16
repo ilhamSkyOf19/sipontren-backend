@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import {
   CreateNewsType,
+  NewsFilterType,
   ResponseNewsType,
   UpdateNewsType,
 } from "../models/news-model";
@@ -54,6 +55,26 @@ export class NewsController {
     try {
       const response = await NewsService.read();
 
+      return res.status(200).json(response);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // Read by filter
+  static async readByFilter(
+    req: Request<{ filter: NewsFilterType }>,
+    res: Response<ResponseData<ResponseNewsType[]>>,
+    next: NextFunction
+  ) {
+    try {
+      // get filter from params
+      const filter = req.params.filter;
+
+      // call service
+      const response = await NewsService.readByFilter(filter);
+
+      // return response
       return res.status(200).json(response);
     } catch (error) {
       next(error);

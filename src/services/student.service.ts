@@ -37,7 +37,7 @@ export class StudentService {
       if (savedStudent[field]) {
         savedStudent[
           field
-        ] = `${process.env.BASE_URL}/student/${savedStudent[field]}`;
+        ] = `${process.env.BASE_URL}/uploads/student/${savedStudent[field]}`;
       }
     });
 
@@ -59,7 +59,7 @@ export class StudentService {
       ];
       fileFields.forEach((field) => {
         if (obj[field])
-          obj[field] = `${process.env.BASE_URL}/student/${obj[field]}`;
+          obj[field] = `${process.env.BASE_URL}/uploads/student/${obj[field]}`;
       });
       return toResponseStudentType(obj);
     });
@@ -82,7 +82,7 @@ export class StudentService {
     ];
     fileFields.forEach((field) => {
       if (obj[field])
-        obj[field] = `${process.env.BASE_URL}/student/${obj[field]}`;
+        obj[field] = `${process.env.BASE_URL}/uploads/student/${obj[field]}`;
     });
 
     return {
@@ -98,10 +98,8 @@ export class StudentService {
     req: UpdateStudentType,
     file: FileStudent
   ): Promise<ResponseData<ResponseStudentType>> {
-    const studentRes = await this.detail(id);
-    if (!studentRes.success) return studentRes;
-
-    const student = studentRes.data;
+    const student = await StudentModel.findById(id).exec();
+    if (!student) return { success: false, message: "student not found" };
 
     // delete file lama jika ada yang baru
     for (const key of Object.keys(file) as (keyof FileStudent)[]) {
@@ -135,7 +133,7 @@ export class StudentService {
     ];
     fileFields.forEach((field) => {
       if (obj[field])
-        obj[field] = `${process.env.BASE_URL}/student/${obj[field]}`;
+        obj[field] = `${process.env.BASE_URL}/uploads/student/${obj[field]}`;
     });
 
     return {
@@ -147,10 +145,8 @@ export class StudentService {
 
   // delete
   static async delete(id: string): Promise<ResponseMessage> {
-    const studentRes = await this.detail(id);
-    if (!studentRes.success) return studentRes;
-
-    const student = studentRes.data;
+    const studentRes = await StudentModel.findById(id).exec();
+    if (!studentRes) return { success: false, message: "student not found" };
 
     // delete semua file
     const fileFields: (keyof FileStudent)[] = [
@@ -161,7 +157,7 @@ export class StudentService {
       "fc_kis_kip",
     ];
     for (const field of fileFields) {
-      await FileService.deleteFormPath(student[field], "student");
+      await FileService.deleteFormPath(studentRes[field], "student");
     }
 
     await StudentModel.findByIdAndDelete(id).exec();
@@ -187,7 +183,7 @@ export class StudentService {
       ];
       fileFields.forEach((field) => {
         if (obj[field])
-          obj[field] = `${process.env.BASE_URL}/student/${obj[field]}`;
+          obj[field] = `${process.env.BASE_URL}/uploads/student/${obj[field]}`;
       });
       return toResponseStudentType(obj);
     });

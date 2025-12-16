@@ -22,6 +22,9 @@ newsRouter.post(
 // read public
 newsRouter.get("/read", NewsController.read);
 
+// read by filter
+newsRouter.get("/readByFilter/:filter", NewsController.readByFilter);
+
 // detail
 newsRouter.get("/detail/:id", NewsController.detail);
 

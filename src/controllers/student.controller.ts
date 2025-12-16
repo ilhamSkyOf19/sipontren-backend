@@ -131,6 +131,7 @@ export class StudentController {
         jumlah_saudara: Number(req.body.jumlah_saudara),
         usia: Number(req.body.usia),
       });
+
       if (!body.success) {
         if (req.files && !Array.isArray(req.files)) {
           const files = req.files as Record<string, Express.Multer.File[]>;

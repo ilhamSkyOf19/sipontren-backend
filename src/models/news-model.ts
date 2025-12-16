@@ -1,4 +1,5 @@
 // src/models/news-model.ts
+export type NewsFilterType = "today" | "week" | "month";
 
 export type INews = {
   _id: string; // MongoDB ObjectId (string)
