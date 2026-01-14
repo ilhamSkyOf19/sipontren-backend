@@ -32,10 +32,20 @@ async function initializeDB() {
     const app = express();
 
     // 3. CORS
+    const allowedOrigins = [process.env.ORIGIN_1, process.env.ORIGIN_2];
+
     app.use(
       cors({
-        origin: process.env.ORIGIN,
-        credentials: true,
+        origin: function (origin, callback) {
+          if (!origin) return callback(null, true); // untuk request tools seperti Postman
+          if (allowedOrigins.includes(origin)) {
+            callback(null, true);
+          } else {
+            callback(new Error("Not allowed by CORS"));
+          }
+        },
+        methods: ["GET", "POST", "PUT", "DELETE", "PATCH"], // metode yang diizinkan
+        credentials: true, // jika ingin mengizinkan cookie
       })
     );
 
