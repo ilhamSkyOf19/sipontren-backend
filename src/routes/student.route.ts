@@ -29,6 +29,8 @@ const studentUpload = upload.fields([
 // create
 studentRouter.post("/create", studentUpload, StudentController.create);
 
+studentRouter.post("/download", StudentController.downloadMultiple);
+
 // read all (public)
 studentRouter.get("/read", StudentController.read);
 

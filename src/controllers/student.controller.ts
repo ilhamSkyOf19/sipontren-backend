@@ -10,6 +10,7 @@ import { validation } from "../services/validation.service";
 import { StudentValidation } from "../validations/student-validation";
 import { FileService } from "../services/file.service";
 import { StudentService } from "../services/student.service";
+import archiver from "archiver";
 
 export class StudentController {
   // read all students
@@ -223,6 +224,48 @@ export class StudentController {
       if (!response.success) return res.status(400).json(response);
 
       return res.status(200).json(response);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // download
+  static async downloadMultiple(
+    req: Request<{}, {}, { dokuments: string[] }>,
+    res: Response,
+    next: NextFunction
+  ) {
+    try {
+      const { dokuments } = req.body;
+
+      if (!dokuments || dokuments.length === 0) {
+        return res.status(400).json({ message: "No files selected" });
+      }
+
+      res.setHeader("Content-Type", "application/zip");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="students.zip"`
+      );
+
+      const archive = archiver("zip", { zlib: { level: 9 } });
+      archive.pipe(res);
+
+      for (const file of dokuments) {
+        const filePath = FileService.getFilePath("student", file);
+
+        // cek file
+        if (!FileService.fileExists(filePath)) {
+          console.warn(`File not found: ${filePath}`);
+          continue; // skip file jika tidak ada
+        }
+
+        // tambahkan file ke zip
+        archive.file(filePath, { name: file });
+      }
+
+      // finalisasi zip
+      await archive.finalize();
     } catch (error) {
       next(error);
     }
