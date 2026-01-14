@@ -1,59 +1,80 @@
-import { PamfletModel } from "../schemas/pamflet.schema";
+import { prisma } from "../lib/prismaClient";
 import { FileService } from "./file.service";
 
 export class PamfletService {
-  // create
-  static async create(pamflet: string): Promise<{ _id: string; img: string }> {
-    const response = await PamfletModel.create({ pamflet });
-    return { _id: response._id.toString(), img: response.pamflet };
+  // CREATE
+  static async create(pamflet: string): Promise<{ id: number; img: string }> {
+    const response = await prisma.pamflet.create({
+      data: { pamflet },
+    });
+
+    return {
+      id: response.id,
+      img: response.pamflet,
+    };
   }
 
-  // read all
-  static async read(): Promise<{ _id: string; img: string }[]> {
-    const response = await PamfletModel.find().sort({ createdAt: -1 });
+  // READ ALL
+  static async read(): Promise<{ id: number; img: string }[]> {
+    const response = await prisma.pamflet.findMany({
+      orderBy: { createdAt: "desc" },
+    });
+
     return response.map((item) => ({
-      _id: item._id.toString(),
+      id: item.id,
       img: item.pamflet,
     }));
   }
 
-  // read detail
-  static async detail(id: string): Promise<{ _id: string; img: string }> {
-    const response = await PamfletModel.findById(id);
+  // READ DETAIL
+  static async detail(id: string): Promise<{ id: number; img: string }> {
+    const response = await prisma.pamflet.findUnique({
+      where: { id: +id },
+    });
+
     if (!response) throw new Error("Pamflet not found");
-    return { _id: response._id.toString(), img: response.pamflet };
+
+    return {
+      id: response.id,
+      img: response.pamflet,
+    };
   }
 
-  // update
+  // UPDATE
   static async update(
     id: string,
     pamflet: string
-  ): Promise<{ _id: string; img: string }> {
+  ): Promise<{ id: number; img: string }> {
     const oldPamflet = await this.detail(id);
 
-    const response = await PamfletModel.findByIdAndUpdate(
-      id,
-      { pamflet },
-      { new: true }
-    );
-
-    if (!response) throw new Error("Pamflet not found");
+    const response = await prisma.pamflet.update({
+      where: { id: +id },
+      data: { pamflet },
+    });
 
     // delete old file
     await FileService.deleteFormPath(oldPamflet.img, "pamflet");
 
-    return { _id: response._id.toString(), img: response.pamflet };
+    return {
+      id: response.id,
+      img: response.pamflet,
+    };
   }
 
-  // delete
-  static async delete(id: string): Promise<{ _id: string; img: string }> {
+  // DELETE
+  static async delete(id: string): Promise<{ id: number; img: string }> {
     const pamflet = await this.detail(id);
 
-    await PamfletModel.findByIdAndDelete(id);
+    await prisma.pamflet.delete({
+      where: { id: +id },
+    });
 
     // delete file
     await FileService.deleteFormPath(pamflet.img, "pamflet");
 
-    return { _id: id, img: pamflet.img };
+    return {
+      id: +id,
+      img: pamflet.img,
+    };
   }
 }

@@ -90,7 +90,7 @@ export class NewsController {
     try {
       const id = req.params.id; // tetap string untuk Mongoose
 
-      const response = await NewsService.detail(id);
+      const response = await NewsService.detail(+id);
 
       if (!response.success) {
         return res.status(400).json({
@@ -119,7 +119,7 @@ export class NewsController {
       const id = req.params.id;
 
       // cek apakah news ada
-      const existing = await NewsService.detail(id);
+      const existing = await NewsService.detail(+id);
       if (!existing) {
         if (req.file) await FileService.deleteFile(req.file.path);
 
@@ -141,7 +141,7 @@ export class NewsController {
       }
 
       const response = await NewsService.update(
-        id,
+        +id,
         body.data,
         req.file?.filename
       );
@@ -172,7 +172,7 @@ export class NewsController {
     try {
       const id = req.params.id;
 
-      const response = await NewsService.delete(id);
+      const response = await NewsService.delete(+id);
 
       return res.status(200).json(response);
     } catch (error) {

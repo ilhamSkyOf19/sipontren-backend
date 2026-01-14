@@ -1,5 +1,5 @@
 export type IAdmin = {
-  _id?: string; // ObjectId dari MongoDB
+  id: number; // ObjectId dari MongoDB
   name: string;
   email: string;
   password: string;
@@ -10,22 +10,16 @@ export type IAdmin = {
 
 export type CreateAdminType = Omit<
   IAdmin,
-  "_id" | "createdAt" | "updatedAt" | "role"
+  "id" | "createdAt" | "updatedAt" | "role"
 >;
 
-export type UpdateAdminType = Partial<Omit<IAdmin, "_id" | "role">> & {
-  _id: string;
-};
+export type UpdateAdminType = Partial<Omit<IAdmin, "role">>;
 
-export type ResponseAdminType = Omit<IAdmin, "password"> & {
-  _id: string;
-};
+export type ResponseAdminType = Omit<IAdmin, "password">;
 
-export const toResponseAdminType = (
-  admin: IAdmin & { _id: string }
-): ResponseAdminType => {
+export const toResponseAdminType = (admin: IAdmin): ResponseAdminType => {
   return {
-    _id: admin._id,
+    id: admin.id,
     name: admin.name,
     email: admin.email,
     role: admin.role,

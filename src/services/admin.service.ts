@@ -1,26 +1,31 @@
-import {
-  CreateAdminType,
-  ResponseAdminType,
-  toResponseAdminType,
-} from "../models/admin-model";
+import prisma from "../lib/prismaClient";
+import { CreateAdminType, ResponseAdminType } from "../models/admin-model";
 import bcryptjs from "bcryptjs";
-import { AdminModel } from "../schemas/admin.schema";
 
 export class AdminService {
   // CREATE ADMIN
   static async create(req: CreateAdminType): Promise<ResponseAdminType> {
-    // Hash password
+    // hash password
     const passwordHash = bcryptjs.hashSync(req.password, 10);
 
-    // Create to DB
-    const admin = await AdminModel.create({
-      name: req.name,
-      email: req.email,
-      password: passwordHash,
-      role: "admin",
+    // simpan ke MySQL via Prisma
+    const admin = await prisma.admin.create({
+      data: {
+        name: req.name,
+        email: req.email,
+        password: passwordHash,
+        role: "admin",
+      },
     });
 
-    // Convert to response format
-    return toResponseAdminType(admin);
+    // response tanpa password
+    return {
+      id: admin.id,
+      name: admin.name,
+      email: admin.email,
+      role: admin.role,
+      createdAt: admin.createAt,
+      updatedAt: admin.updateAt,
+    };
   }
 }

@@ -1,59 +1,80 @@
-import { BannerModel } from "../schemas/banner.schema";
+import { prisma } from "../lib/prismaClient";
 import { FileService } from "./file.service";
 
 export class BannerService {
-  // create
-  static async create(banner: string): Promise<{ _id: string; img: string }> {
-    const response = await BannerModel.create({ banner });
-    return { _id: response._id.toString(), img: response.banner };
+  // CREATE
+  static async create(banner: string): Promise<{ id: number; img: string }> {
+    const response = await prisma.banner.create({
+      data: { banner },
+    });
+
+    return {
+      id: response.id,
+      img: response.banner,
+    };
   }
 
-  // read all
-  static async read(): Promise<{ _id: string; img: string }[]> {
-    const response = await BannerModel.find().sort({ createdAt: -1 });
+  // READ ALL
+  static async read(): Promise<{ id: number; img: string }[]> {
+    const response = await prisma.banner.findMany({
+      orderBy: { createdAt: "desc" },
+    });
+
     return response.map((item) => ({
-      _id: item._id.toString(),
+      id: item.id,
       img: item.banner,
     }));
   }
 
-  // read detail
-  static async detail(id: string): Promise<{ _id: string; img: string }> {
-    const response = await BannerModel.findById(id);
+  // READ DETAIL
+  static async detail(id: number): Promise<{ id: number; img: string }> {
+    const response = await prisma.banner.findUnique({
+      where: { id },
+    });
+
     if (!response) throw new Error("Banner not found");
-    return { _id: response._id.toString(), img: response.banner };
+
+    return {
+      id: response.id,
+      img: response.banner,
+    };
   }
 
-  // update
+  // UPDATE
   static async update(
-    id: string,
+    id: number,
     banner: string
-  ): Promise<{ _id: string; img: string }> {
+  ): Promise<{ id: number; img: string }> {
     const oldBanner = await this.detail(id);
 
-    const response = await BannerModel.findByIdAndUpdate(
-      id,
-      { banner },
-      { new: true }
-    );
+    const response = await prisma.banner.update({
+      where: { id },
+      data: { banner },
+    });
 
-    if (!response) throw new Error("Banner not found");
-
-    // delete old file
+    // hapus file lama
     await FileService.deleteFormPath(oldBanner.img, "banner");
 
-    return { _id: response._id.toString(), img: response.banner };
+    return {
+      id: response.id,
+      img: response.banner,
+    };
   }
 
-  // delete
-  static async delete(id: string): Promise<{ _id: string; img: string }> {
+  // DELETE
+  static async delete(id: number): Promise<{ id: number; img: string }> {
     const banner = await this.detail(id);
 
-    await BannerModel.findByIdAndDelete(id);
+    await prisma.banner.delete({
+      where: { id },
+    });
 
     // delete file
     await FileService.deleteFormPath(banner.img, "banner");
 
-    return { _id: id, img: banner.img };
+    return {
+      id,
+      img: banner.img,
+    };
   }
 }

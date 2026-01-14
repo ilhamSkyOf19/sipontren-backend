@@ -75,9 +75,9 @@ export class AlumniController {
     next: NextFunction
   ) {
     try {
-      const _id = req.params.id;
+      const id = req.params.id;
 
-      const response = await AlumniService.detail(_id);
+      const response = await AlumniService.detail(+id);
       if (!response.success) return res.status(400).json(response);
 
       return res.status(200).json(response);
@@ -94,16 +94,16 @@ export class AlumniController {
     next: NextFunction
   ) {
     try {
-      const _id = req.params.id;
+      const id = req.params.id;
 
-      const alumni = await AlumniService.detail(_id);
+      const alumni = await AlumniService.detail(+id);
 
       if (!alumni.success) {
         if (req.file) await FileService.deleteFile(req.file.path);
         return res.status(400).json(alumni);
       }
 
-      const body = validation<Omit<UpdateAlumniType, "img_alumni" | "_id">>(
+      const body = validation<Omit<UpdateAlumniType, "img_alumni" | "id">>(
         AlumniValidation.UPDATE,
         req.body
       );
@@ -114,7 +114,7 @@ export class AlumniController {
       }
 
       const response = await AlumniService.update(
-        _id,
+        +id,
         req.file?.filename ?? "",
         body.data
       );
@@ -135,9 +135,9 @@ export class AlumniController {
     next: NextFunction
   ) {
     try {
-      const _id = req.params.id;
+      const id = req.params.id;
 
-      const response = await AlumniService.delete(_id);
+      const response = await AlumniService.delete(+id);
 
       if (!response.success) return res.status(400).json(response);
 

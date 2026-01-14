@@ -6,7 +6,7 @@ export class BannerController {
   // create
   static async create(
     req: Request,
-    res: Response<ResponseData<{ _id: string; img: string }>>,
+    res: Response<ResponseData<{ id: number; img: string }>>,
     next: NextFunction
   ) {
     try {
@@ -33,7 +33,7 @@ export class BannerController {
   // read all
   static async read(
     _req: Request,
-    res: Response<ResponseData<{ _id: string; img: string }[]>>,
+    res: Response<ResponseData<{ id: number; img: string }[]>>,
     next: NextFunction
   ) {
     try {
@@ -53,13 +53,13 @@ export class BannerController {
   // read detail
   static async readDetail(
     req: Request<{ id: string }>,
-    res: Response<ResponseData<{ _id: string; img: string }>>,
+    res: Response<ResponseData<{ id: number; img: string }>>,
     next: NextFunction
   ) {
     try {
       const { id } = req.params;
 
-      const response = await BannerService.detail(id);
+      const response = await BannerService.detail(+id);
 
       return res.status(200).json({
         success: true,
@@ -75,7 +75,7 @@ export class BannerController {
   // update
   static async update(
     req: Request<{ id: string }>,
-    res: Response<ResponseData<{ _id: string; img: string }>>,
+    res: Response<ResponseData<{ id: number; img: string }>>,
     next: NextFunction
   ) {
     try {
@@ -88,7 +88,7 @@ export class BannerController {
         });
       }
 
-      const response = await BannerService.update(id, req.file.filename);
+      const response = await BannerService.update(+id, req.file.filename);
 
       return res.status(200).json({
         success: true,
@@ -104,13 +104,13 @@ export class BannerController {
   // delete
   static async delete(
     req: Request<{ id: string }>,
-    res: Response<ResponseData<{ _id: string; img: string }>>,
+    res: Response<ResponseData<{ id: number; img: string }>>,
     next: NextFunction
   ) {
     try {
       const { id } = req.params;
 
-      const response = await BannerService.delete(id);
+      const response = await BannerService.delete(+id);
 
       return res.status(200).json({
         success: true,

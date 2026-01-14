@@ -2,13 +2,12 @@
 export type NewsFilterType = "today" | "week" | "month";
 
 export type INews = {
-  _id: string; // MongoDB ObjectId (string)
+  id: number;
   category: "berita" | "artikel";
   title: string;
   content: string;
   thumbnail: string;
-  url_thumbnail?: string;
-  createdAt: Date; // otomatis dari Mongoose timestamps
+  createdAt: Date;
   updatedAt: Date;
 };
 
@@ -24,7 +23,7 @@ export type UpdateNewsType = Partial<CreateNewsType>;
 
 // response
 export type ResponseNewsType = CreateNewsType & {
-  _id: string;
+  id: number;
   thumbnail: string;
   url_thumbnail?: string;
   createdAt: Date;
@@ -34,12 +33,11 @@ export type ResponseNewsType = CreateNewsType & {
 // to response
 export const toResponseNews = (news: INews): ResponseNewsType => {
   return {
-    _id: news._id,
+    id: news.id,
     category: news.category,
     title: news.title,
     content: news.content,
     thumbnail: news.thumbnail,
-    url_thumbnail: news.url_thumbnail,
     createdAt: news.createdAt,
     updatedAt: news.updatedAt,
   };

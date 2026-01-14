@@ -1,5 +1,5 @@
+import prisma from "../lib/prismaClient";
 import { LoginType, PayloadType } from "../models/auth-model";
-import { AdminModel } from "../schemas/admin.schema";
 import { ResponseData } from "../types/types";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -8,7 +8,11 @@ export class AuthService {
   // LOGIN
   static async login(req: LoginType): Promise<ResponseData<string>> {
     // cari admin berdasarkan email
-    const admin = await AdminModel.findOne({ email: req.email });
+    const admin = await prisma.admin.findUnique({
+      where: {
+        email: req.email,
+      },
+    });
 
     // cek admin
     if (!admin) {
@@ -27,9 +31,9 @@ export class AuthService {
       };
     }
 
-    // generate payload (gunakan _id dari MongoDB)
+    // generate payload (id dari MySQL)
     const payload: PayloadType = {
-      id: admin._id.toString(),
+      id: admin.id,
       email: admin.email,
       name: admin.name,
       role: "admin",
@@ -40,7 +44,6 @@ export class AuthService {
       expiresIn: "1d",
     });
 
-    // return
     return {
       success: true,
       message: "success",

@@ -1,25 +1,25 @@
 // MongoDB / Mongoose style
 export type IBanner = {
-  _id: string;
+  id: number;
   banner: string;
   createdAt: string;
   updatedAt: string;
 };
 
-// Create – tanpa _id, dibuat otomatis
+// Create – tanpa id, dibuat otomatis
 export type CreateBaType = {
   banner: string;
 };
 
-// Update – _id wajib, pamflet optional
+// Update – id wajib, pamflet optional
 export type UpdateBannerType = {
-  _id: string;
+  id: number;
   banner?: string;
 };
 
 // Response – dikirim ke FE
 export type ResponseBannerType = {
-  _id: string;
+  id: number;
   banner: string;
   createdAt: string;
   updatedAt: string;
@@ -27,7 +27,7 @@ export type ResponseBannerType = {
 
 // Mapper dari Mongoose Document ke Response
 export const toResponseBannerType = (banner: IBanner): ResponseBannerType => ({
-  _id: banner._id,
+  id: banner.id,
   banner: banner.banner,
   createdAt: banner.createdAt,
   updatedAt: banner.updatedAt,

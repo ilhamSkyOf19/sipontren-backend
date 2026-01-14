@@ -1,6 +1,6 @@
 // MongoDB / Mongoose style
 export type IFasilitas = {
-  _id: string;
+  id: number;
   fasilitas: string;
   keterangan: string;
   images: string;
@@ -8,15 +8,15 @@ export type IFasilitas = {
   updatedAt: Date;
 };
 
-// Create – tanpa _id, dibuat otomatis
+// Create – tanpa id, dibuat otomatis
 export type CreateFasilitasType = Pick<IFasilitas, "fasilitas" | "keterangan">;
 
-// Update – _id wajib,
+// Update – id wajib,
 export type UpdateFasilitasType = Partial<CreateFasilitasType>;
 
 // Response –
 export type ResponseFasilitasType = {
-  _id: string;
+  id: number;
   fasilitas: string;
   keterangan: string;
   images: string;
@@ -28,7 +28,7 @@ export type ResponseFasilitasType = {
 export const toResponseFasilitasType = (
   fasilitas: IFasilitas
 ): ResponseFasilitasType => ({
-  _id: fasilitas._id,
+  id: fasilitas.id,
   fasilitas: fasilitas.fasilitas,
   keterangan: fasilitas.keterangan,
   images: fasilitas.images,

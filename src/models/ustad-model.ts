@@ -1,6 +1,6 @@
 // Ustad Interface (MongoDB)
 export interface IUstad {
-  _id: string; // MongoDB ObjectId sebagai string
+  id: number; // MongoDB ObjectId sebagai string
   name: string;
   jenis_kelamin: "laki_laki" | "perempuan";
   tempat_lahir: string;
@@ -9,9 +9,8 @@ export interface IUstad {
   no_telepon: string;
   jabatan: string;
   ustad_img: string;
-  url_ustad_img: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 // create type
@@ -28,21 +27,20 @@ export type CreateUstadType = {
 
 // update type
 export type UpdateUstadType = Partial<CreateUstadType> & {
-  _id: string;
+  id: number;
 };
 
 // response type
 export type ResponseUstadType = Omit<CreateUstadType, "ustad_img"> & {
-  _id: string;
+  id: number;
   ustad_img: string;
-  url_ustad_img: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 // to response helper
 export const toResponseUstadType = (ustad: IUstad): ResponseUstadType => ({
-  _id: ustad._id,
+  id: ustad.id,
   name: ustad.name,
   jenis_kelamin: ustad.jenis_kelamin,
   tempat_lahir: ustad.tempat_lahir,
@@ -51,7 +49,6 @@ export const toResponseUstadType = (ustad: IUstad): ResponseUstadType => ({
   no_telepon: ustad.no_telepon,
   jabatan: ustad.jabatan,
   ustad_img: ustad.ustad_img,
-  url_ustad_img: ustad.url_ustad_img,
   createdAt: ustad.createdAt,
   updatedAt: ustad.updatedAt,
 });

@@ -82,9 +82,9 @@ export class UstadController {
     next: NextFunction
   ) {
     try {
-      const _id = req.params.id;
+      const id = req.params.id;
 
-      const response = await UstadService.detail(_id);
+      const response = await UstadService.detail(+id);
 
       if (!response.success) return res.status(400).json(response);
 
@@ -102,16 +102,16 @@ export class UstadController {
     next: NextFunction
   ) {
     try {
-      const _id = req.params.id;
+      const id = req.params.id;
 
-      const ustad = await UstadService.detail(_id);
+      const ustad = await UstadService.detail(+id);
 
       if (!ustad.success) {
         if (req.file) await FileService.deleteFile(req.file.path);
         return res.status(400).json(ustad);
       }
 
-      const body = validation<Omit<UpdateUstadType, "ustad_img" | "_id">>(
+      const body = validation<Omit<UpdateUstadType, "ustad_img" | "id">>(
         UstadValidation.UPDATE,
         req.body
       );
@@ -120,12 +120,14 @@ export class UstadController {
         if (req.file) await FileService.deleteFile(req.file.path);
         return res.status(400).json({ success: false, message: body.message });
       }
-
-      const response = await UstadService.update(req.file?.filename ?? "", {
-        ...body.data,
-        _id: ustad.data._id,
-        ustad_img: req.file?.filename ?? ustad.data.ustad_img,
-      });
+      const response = await UstadService.update(
+        +id,
+        {
+          ...body.data,
+          id: ustad.data.id,
+        },
+        req.file?.filename
+      );
 
       if (!response.success) return res.status(400).json(response);
 
@@ -143,9 +145,9 @@ export class UstadController {
     next: NextFunction
   ) {
     try {
-      const _id = req.params.id;
+      const id = req.params.id;
 
-      const response = await UstadService.delete(_id);
+      const response = await UstadService.delete(+id);
 
       if (!response.success) return res.status(400).json(response);
 

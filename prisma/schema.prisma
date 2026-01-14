@@ -1,0 +1,129 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model admin {
+  id       Int        @id @default(autoincrement())
+  name     String
+  email    String     @unique
+  password String
+  createAt DateTime   @default(now())
+  updateAt DateTime   @updatedAt
+  role     admin_role @default(admin)
+}
+
+model alumni {
+  id          Int      @id @default(autoincrement())
+  name        String
+  angkatan    String
+  img_alumni  String
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model news {
+  id        Int           @id @default(autoincrement())
+  category  news_category @default(berita)
+  title     String
+  content   String
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  thumbnail String
+}
+
+model pamflet {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  pamflet   String
+}
+
+model student {
+  id                  Int                   @id @default(autoincrement())
+  jenis_sekolah       student_jenis_sekolah
+  nisn                String
+  nik                 String
+  nama_lengkap        String
+  jenis_kelamin       student_jenis_kelamin
+  usia                Int
+  tempat_lahir        String
+  tanggal_lahir       DateTime
+  alamat              String
+  anak_ke             Int
+  jumlah_saudara      Int
+  asal_sekolah        String
+  alamat_sekolah_asal String
+  nama_lengkap_ayah   String
+  nama_lengkap_ibu    String
+  nama_lengkap_wali   String
+  foto_formal         String
+  fc_akta_kelahiran   String
+  foto_kk             String
+  fc_ktp              String
+  fc_kis_kip          String
+  no_telepon          String
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+}
+
+model ustad {
+  id            Int                 @id @default(autoincrement())
+  name          String
+  jenis_kelamin ustad_jenis_kelamin
+  tanggal_lahir String
+  alamat        String
+  no_telepon    String
+  jabatan       String
+  ustad_img     String
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  tempat_lahir  String
+}
+
+model fasilitas {
+  id         Int      @id @default(autoincrement())
+  fasilitas  String
+  keterangan String
+  images     String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model banner {
+  id        Int      @id @default(autoincrement())
+  banner    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum news_category {
+  berita
+  artikel
+}
+
+enum student_jenis_sekolah {
+  SD
+  SMP
+  SMA
+}
+
+enum ustad_jenis_kelamin {
+  laki_laki
+  perempuan
+}
+
+enum student_jenis_kelamin {
+  laki_laki
+  perempuan
+}
+
+enum admin_role {
+  admin
+}

@@ -6,7 +6,7 @@ export class PamfletController {
   // create
   static async create(
     req: Request,
-    res: Response<ResponseData<{ _id: string; img: string }>>,
+    res: Response<ResponseData<{ id: number; img: string }>>,
     next: NextFunction
   ) {
     try {
@@ -33,7 +33,7 @@ export class PamfletController {
   // read all
   static async read(
     _req: Request,
-    res: Response<ResponseData<{ _id: string; img: string }[]>>,
+    res: Response<ResponseData<{ id: number; img: string }[]>>,
     next: NextFunction
   ) {
     try {
@@ -53,7 +53,7 @@ export class PamfletController {
   // read detial
   static async readDetail(
     req: Request<{ id: string }>,
-    res: Response<ResponseData<{ _id: string; img: string }>>,
+    res: Response<ResponseData<{ id: number; img: string }>>,
     next: NextFunction
   ) {
     try {
@@ -78,7 +78,7 @@ export class PamfletController {
   // update
   static async update(
     req: Request<{ id: string }>,
-    res: Response<ResponseData<{ _id: string; img: string }>>,
+    res: Response<ResponseData<{ id: number; img: string }>>,
     next: NextFunction
   ) {
     try {
@@ -107,7 +107,7 @@ export class PamfletController {
   // delete
   static async delete(
     req: Request<{ id: string }>,
-    res: Response<ResponseData<{ _id: string; img: string }>>,
+    res: Response<ResponseData<{ id: number; img: string }>>,
     next: NextFunction
   ) {
     try {

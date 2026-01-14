@@ -1,6 +1,6 @@
 // Student Interface (MongoDB)
 export type IStudent = {
-  _id: string; // MongoDB ObjectId sebagai string
+  id: number;
   jenis_sekolah: "SD" | "SMP" | "SMA";
   nisn: string;
   nik: string;
@@ -8,7 +8,7 @@ export type IStudent = {
   jenis_kelamin: "laki_laki" | "perempuan";
   usia: number;
   tempat_lahir: string;
-  tanggal_lahir: string; // ISO string
+  tanggal_lahir: string;
   alamat: string;
   no_telepon: string;
   anak_ke: number;
@@ -27,14 +27,14 @@ export type IStudent = {
   fc_kis_kip: string;
 
   // timestamps
-  createdAt: string; // ISO string dari mongoose timestamps
-  updatedAt: string;
+  createdAt: Date; // ISO string dari mongoose timestamps
+  updatedAt: Date;
 };
 
 // Create student type
 export type CreateStudentType = Omit<
   IStudent,
-  | "_id"
+  | "id"
   | "createdAt"
   | "updatedAt"
   | "foto_formal"
@@ -46,19 +46,21 @@ export type CreateStudentType = Omit<
 
 // Update student type
 export type UpdateStudentType = Partial<
-  Omit<IStudent, "_id" | "createdAt" | "updatedAt">
+  Omit<IStudent, "id" | "createdAt" | "updatedAt">
 >;
 
 // Response type
-export type ResponseStudentType = IStudent;
+export type ResponseStudentType = Omit<IStudent, "tanggal_lahir"> & {
+  tanggal_lahir: Date;
+};
 
 // To response (mengubah mongoose document menjadi ResponseStudentType)
 export const toResponseStudentType = (
-  student: IStudent
+  student: Omit<IStudent, "tanggal_lahir"> & { tanggal_lahir: Date }
 ): ResponseStudentType => {
   return {
     ...student,
-    _id: student._id.toString(),
+    id: student.id,
   };
 };
 

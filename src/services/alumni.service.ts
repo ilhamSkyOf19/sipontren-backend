@@ -1,44 +1,52 @@
 import {
-  IAlumni,
   CreateAlumniType,
   UpdateAlumniType,
   ResponseAlumniType,
   toResponseAlumniType,
 } from "../models/alumni-model";
-import AlumniModel from "../schemas/alumni.schema";
 import { ResponseData, ResponseMessage } from "../types/types";
 import { FileService } from "./file.service";
+import { prisma } from "../lib/prismaClient";
 
 export class AlumniService {
+  // =======================
   // CREATE
+  // =======================
   static async create(
     req: Omit<CreateAlumniType, "img_alumni">,
     img_alumni: string
   ): Promise<ResponseAlumniType> {
-    const response: IAlumni = await AlumniModel.create({
-      name: req.name,
-      angkatan: req.angkatan,
-      description: req.description,
-      img_alumni,
+    const response = await prisma.alumni.create({
+      data: {
+        name: req.name,
+        angkatan: req.angkatan,
+        description: req.description,
+        img_alumni,
+      },
     });
 
     return toResponseAlumniType(response);
   }
 
+  // =======================
   // READ ALL
+  // =======================
   static async read(): Promise<ResponseAlumniType[]> {
-    const response: IAlumni[] = await AlumniModel.find()
-      .sort({
-        createdAt: -1,
-      })
-      .limit(10);
+    const response = await prisma.alumni.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 10,
+    });
 
-    return response.map((item) => toResponseAlumniType(item));
+    return response.map(toResponseAlumniType);
   }
 
+  // =======================
   // DETAIL
-  static async detail(_id: string): Promise<ResponseData<ResponseAlumniType>> {
-    const response = await AlumniModel.findById(_id);
+  // =======================
+  static async detail(id: number): Promise<ResponseData<ResponseAlumniType>> {
+    const response = await prisma.alumni.findUnique({
+      where: { id },
+    });
 
     if (!response) {
       return {
@@ -54,47 +62,68 @@ export class AlumniService {
     };
   }
 
+  // =======================
   // UPDATE
+  // =======================
   static async update(
-    _id: string,
+    id: number,
     img_alumni: string,
-    req: Omit<UpdateAlumniType, "img_alumni" | "_id">
+    req: Omit<UpdateAlumniType, "img_alumni" | "id">
   ): Promise<ResponseData<ResponseAlumniType>> {
-    const alumni = await this.detail(_id);
-    if (!alumni.success) return alumni;
+    const alumni = await prisma.alumni.findUnique({
+      where: { id },
+    });
 
-    const oldImage = alumni.data.img_alumni;
+    if (!alumni) {
+      return {
+        success: false,
+        message: "Alumni not found",
+      };
+    }
 
-    // Jika ada gambar baru → hapus file lama
-    if (img_alumni) {
+    const oldImage = alumni.img_alumni;
+
+    // jika ada gambar baru → hapus lama
+    if (img_alumni && img_alumni !== oldImage) {
       await FileService.deleteFormPath(oldImage, "img_alumni");
     }
 
-    const response = await AlumniModel.findByIdAndUpdate(
-      _id,
-      {
+    const response = await prisma.alumni.update({
+      where: { id },
+      data: {
         ...req,
         img_alumni: img_alumni || oldImage,
       },
-      { new: true }
-    );
+    });
 
     return {
       success: true,
       message: "Success update alumni",
-      data: toResponseAlumniType(response!),
+      data: toResponseAlumniType(response),
     };
   }
 
+  // =======================
   // DELETE
-  static async delete(_id: string): Promise<ResponseMessage> {
-    const alumni = await this.detail(_id);
-    if (!alumni.success) return alumni;
+  // =======================
+  static async delete(id: number): Promise<ResponseMessage> {
+    const alumni = await prisma.alumni.findUnique({
+      where: { id },
+    });
 
-    // Hapus file gambar
-    await FileService.deleteFormPath(alumni.data.img_alumni, "img_alumni");
+    if (!alumni) {
+      return {
+        success: false,
+        message: "Alumni not found",
+      };
+    }
 
-    await AlumniModel.findByIdAndDelete(_id);
+    // hapus file gambar
+    await FileService.deleteFormPath(alumni.img_alumni, "img_alumni");
+
+    await prisma.alumni.delete({
+      where: { id },
+    });
 
     return {
       success: true,

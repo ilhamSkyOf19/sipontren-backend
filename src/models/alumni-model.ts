@@ -1,15 +1,15 @@
 // Alumni Interface (MongoDB)
 export type IAlumni = {
-  _id: string; // MongoDB ObjectId (wajib)
+  id: number; // MongoDB ObjectId (wajib)
   name: string;
   angkatan: string;
   description: string;
   img_alumni: string;
-  createdAt: string; // timestamps wajib ada
-  updatedAt: string;
+  createdAt: Date; // timestamps wajib ada
+  updatedAt: Date;
 };
 
-// CREATE – tanpa _id (dibuat oleh MongoDB)
+// CREATE – tanpa id (dibuat oleh MongoDB)
 export type CreateAlumniType = {
   name: string;
   angkatan: string;
@@ -17,26 +17,26 @@ export type CreateAlumniType = {
   img_alumni: string;
 };
 
-// UPDATE – semua optional kecuali _id
+// UPDATE – semua optional kecuali id
 export type UpdateAlumniType = Partial<CreateAlumniType> & {
-  _id: string; // wajib
+  id: number; // wajib
 };
 
 // RESPONSE – dikirim kembali ke FE
 export type ResponseAlumniType = {
-  _id: string;
+  id: number;
   name: string;
   angkatan: string;
   description: string;
   img_alumni: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 // Mapper: Mongoose Document → Response DTO
 export const toResponseAlumniType = (alumni: IAlumni): ResponseAlumniType => {
   return {
-    _id: alumni._id,
+    id: alumni.id,
     name: alumni.name,
     angkatan: alumni.angkatan,
     description: alumni.description,

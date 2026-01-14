@@ -128,5 +128,5 @@ export class UstadValidation {
         })
         .optional(),
     })
-    .strict() as ZodType<Omit<UpdateUstadType, "ustad_img" | "_id">>;
+    .strict() as ZodType<Omit<UpdateUstadType, "ustad_img" | "id">>;
 }

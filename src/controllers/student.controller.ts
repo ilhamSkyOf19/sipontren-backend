@@ -40,7 +40,7 @@ export class StudentController {
     try {
       const id = req.params.id;
 
-      const response = await StudentService.detail(id);
+      const response = await StudentService.detail(+id);
 
       if (!response.success) {
         return res.status(404).json(response);
@@ -95,6 +95,16 @@ export class StudentController {
         data: response,
       });
     } catch (error) {
+      // delete file uploaded jika proses create  gagal
+      if (req.files && !Array.isArray(req.files)) {
+        const files = req.files as Record<string, Express.Multer.File[]>;
+        for (const field in files) {
+          for (const file of files[field]) {
+            await FileService.deleteFile(file.path);
+          }
+        }
+      }
+
       next(error);
     }
   }
@@ -108,7 +118,7 @@ export class StudentController {
     try {
       const id = req.params.id;
 
-      const student = await StudentService.detail(id);
+      const student = await StudentService.detail(+id);
 
       if (!student.success) {
         // delete file uploaded jika student tidak ditemukan
@@ -127,9 +137,11 @@ export class StudentController {
 
       const body = validation<UpdateStudentType>(StudentValidation.UPDATE, {
         ...req.body,
-        anak_ke: Number(req.body.anak_ke),
-        jumlah_saudara: Number(req.body.jumlah_saudara),
-        usia: Number(req.body.usia),
+        anak_ke: req.body.anak_ke ? Number(req.body.anak_ke) : undefined,
+        jumlah_saudara: req.body.jumlah_saudara
+          ? Number(req.body.jumlah_saudara)
+          : undefined,
+        usia: req.body.usia ? Number(req.body.usia) : undefined,
       });
 
       if (!body.success) {
@@ -153,7 +165,7 @@ export class StudentController {
         fc_kis_kip: files["fc_kis_kip"]?.[0]?.filename || "",
       };
 
-      const response = await StudentService.update(id, body.data, fileStudent);
+      const response = await StudentService.update(+id, body.data, fileStudent);
 
       if (!response.success) return res.status(404).json(response);
 
@@ -172,12 +184,21 @@ export class StudentController {
     try {
       const id = req.params.id;
 
-      const response = await StudentService.delete(id);
+      const response = await StudentService.delete(+id);
 
       if (!response.success) return res.status(404).json(response);
 
       return res.status(200).json(response);
     } catch (error) {
+      // delete file uploaded jika proses create  gagal
+      if (req.files && !Array.isArray(req.files)) {
+        const files = req.files as Record<string, Express.Multer.File[]>;
+        for (const field in files) {
+          for (const file of files[field]) {
+            await FileService.deleteFile(file.path);
+          }
+        }
+      }
       next(error);
     }
   }

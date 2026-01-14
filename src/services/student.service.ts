@@ -1,3 +1,4 @@
+import prisma from "../lib/prismaClient";
 import {
   CreateStudentType,
   FileStudent,
@@ -5,111 +6,83 @@ import {
   UpdateStudentType,
   toResponseStudentType,
 } from "../models/student-model";
-import { StudentModel } from "../schemas/student.scehma";
 import { ResponseData, ResponseMessage } from "../types/types";
 import { FileService } from "./file.service";
 
 export class StudentService {
-  // create
+  // CREATE
   static async create(
     req: CreateStudentType,
     file: FileStudent
   ): Promise<ResponseStudentType> {
-    const student = new StudentModel({
-      ...req,
-      usia: Number(req.usia),
-      anak_ke: Number(req.anak_ke),
-      jumlah_saudara: Number(req.jumlah_saudara),
-      ...file,
+    const student = await prisma.student.create({
+      data: {
+        ...req,
+        usia: Number(req.usia),
+        anak_ke: Number(req.anak_ke),
+        jumlah_saudara: Number(req.jumlah_saudara),
+        ...file,
+        tanggal_lahir: new Date(req.tanggal_lahir),
+      },
     });
 
-    const savedStudent = await student.save();
-
-    // generate URL untuk file
-    const fileFields: (keyof FileStudent)[] = [
-      "foto_formal",
-      "fc_akta_kelahiran",
-      "foto_kk",
-      "fc_ktp",
-      "fc_kis_kip",
-    ];
-    fileFields.forEach((field) => {
-      if (savedStudent[field]) {
-        savedStudent[
-          field
-        ] = `${process.env.BASE_URL}/uploads/student/${savedStudent[field]}`;
-      }
+    return toResponseStudentType({
+      ...student,
+      tanggal_lahir: student.tanggal_lahir,
     });
-
-    return toResponseStudentType(savedStudent.toObject());
   }
 
-  // read
+  // READ ALL
   static async read(): Promise<ResponseStudentType[]> {
-    const students = await StudentModel.find().exec();
-
-    return students.map((student) => {
-      const obj = student.toObject();
-      const fileFields: (keyof FileStudent)[] = [
-        "foto_formal",
-        "fc_akta_kelahiran",
-        "foto_kk",
-        "fc_ktp",
-        "fc_kis_kip",
-      ];
-      fileFields.forEach((field) => {
-        if (obj[field])
-          obj[field] = `${process.env.BASE_URL}/uploads/student/${obj[field]}`;
-      });
-      return toResponseStudentType(obj);
+    const students = await prisma.student.findMany({
+      orderBy: { createdAt: "desc" },
     });
+
+    return students.map((item) =>
+      toResponseStudentType({
+        ...item,
+        tanggal_lahir: item.tanggal_lahir,
+      })
+    );
   }
 
-  // detail
-  static async detail(id: string): Promise<ResponseData<ResponseStudentType>> {
-    const student = await StudentModel.findById(id).exec();
-    if (!student) {
-      return { success: false, message: "student not found" };
-    }
-
-    const obj = student.toObject();
-    const fileFields: (keyof FileStudent)[] = [
-      "foto_formal",
-      "fc_akta_kelahiran",
-      "foto_kk",
-      "fc_ktp",
-      "fc_kis_kip",
-    ];
-    fileFields.forEach((field) => {
-      if (obj[field])
-        obj[field] = `${process.env.BASE_URL}/uploads/student/${obj[field]}`;
+  // DETAIL
+  static async detail(id: number): Promise<ResponseData<ResponseStudentType>> {
+    const student = await prisma.student.findUnique({
+      where: { id },
     });
+
+    if (!student) return { success: false, message: "student not found" };
 
     return {
       success: true,
       message: "berhasil membaca student",
-      data: toResponseStudentType(obj),
+      data: toResponseStudentType({
+        ...student,
+        tanggal_lahir: student.tanggal_lahir,
+      }),
     };
   }
 
-  // update
+  // UPDATE
   static async update(
-    id: string,
+    id: number,
     req: UpdateStudentType,
-    file: FileStudent
+    file: Partial<FileStudent>
   ): Promise<ResponseData<ResponseStudentType>> {
-    const student = await StudentModel.findById(id).exec();
+    const student = await prisma.student.findUnique({ where: { id } });
     if (!student) return { success: false, message: "student not found" };
 
-    // delete file lama jika ada yang baru
+    // hapus file lama jika ada file baru
     for (const key of Object.keys(file) as (keyof FileStudent)[]) {
-      if (file[key]) await FileService.deleteFormPath(student[key], "student");
+      if (file[key] && student[key]) {
+        await FileService.deleteFormPath(student[key], "student");
+      }
     }
 
-    // update
-    const updated = await StudentModel.findByIdAndUpdate(
-      id,
-      {
+    const updated = await prisma.student.update({
+      where: { id },
+      data: {
         ...req,
         usia: req.usia ? Number(req.usia) : student.usia,
         anak_ke: req.anak_ke ? Number(req.anak_ke) : student.anak_ke,
@@ -118,37 +91,24 @@ export class StudentService {
           : student.jumlah_saudara,
         ...file,
       },
-      { new: true }
-    ).exec();
-
-    if (!updated) return { success: false, message: "student not found" };
-
-    const obj = updated.toObject();
-    const fileFields: (keyof FileStudent)[] = [
-      "foto_formal",
-      "fc_akta_kelahiran",
-      "foto_kk",
-      "fc_ktp",
-      "fc_kis_kip",
-    ];
-    fileFields.forEach((field) => {
-      if (obj[field])
-        obj[field] = `${process.env.BASE_URL}/uploads/student/${obj[field]}`;
     });
 
     return {
       success: true,
       message: "berhasil update student",
-      data: toResponseStudentType(obj),
+      data: toResponseStudentType({
+        ...updated,
+        tanggal_lahir: updated.tanggal_lahir,
+      }),
     };
   }
 
-  // delete
-  static async delete(id: string): Promise<ResponseMessage> {
-    const studentRes = await StudentModel.findById(id).exec();
-    if (!studentRes) return { success: false, message: "student not found" };
+  // DELETE
+  static async delete(id: number): Promise<ResponseMessage> {
+    const student = await prisma.student.findUnique({ where: { id } });
+    if (!student) return { success: false, message: "student not found" };
 
-    // delete semua file
+    // hapus semua file
     const fileFields: (keyof FileStudent)[] = [
       "foto_formal",
       "fc_akta_kelahiran",
@@ -156,37 +116,37 @@ export class StudentService {
       "fc_ktp",
       "fc_kis_kip",
     ];
+
     for (const field of fileFields) {
-      await FileService.deleteFormPath(studentRes[field], "student");
+      if (student[field]) {
+        await FileService.deleteFormPath(student[field], "student");
+      }
     }
 
-    await StudentModel.findByIdAndDelete(id).exec();
+    await prisma.student.delete({ where: { id } });
 
     return { success: true, message: "berhasil delete student" };
   }
 
-  // search by name
+  // SEARCH BY NAME
   static async searchByName(
     name: string
   ): Promise<ResponseData<ResponseStudentType[]>> {
-    const students = await StudentModel.find({
-      nama_lengkap: { $regex: name, $options: "i" },
-    }).exec();
-    const data = students.map((student) => {
-      const obj = student.toObject();
-      const fileFields: (keyof FileStudent)[] = [
-        "foto_formal",
-        "fc_akta_kelahiran",
-        "foto_kk",
-        "fc_ktp",
-        "fc_kis_kip",
-      ];
-      fileFields.forEach((field) => {
-        if (obj[field])
-          obj[field] = `${process.env.BASE_URL}/uploads/student/${obj[field]}`;
-      });
-      return toResponseStudentType(obj);
+    const students = await prisma.student.findMany({
+      where: {
+        nama_lengkap: { contains: name },
+      },
     });
-    return { success: true, message: "berhasil membaca student", data };
+
+    return {
+      success: true,
+      message: "berhasil membaca student",
+      data: students.map((item) =>
+        toResponseStudentType({
+          ...item,
+          tanggal_lahir: item.tanggal_lahir,
+        })
+      ),
+    };
   }
 }

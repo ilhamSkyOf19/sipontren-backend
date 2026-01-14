@@ -29,5 +29,5 @@ export class AlumniValidation {
         .min(5, { message: "deskripsi minimal 5 karakter" })
         .optional(),
     })
-    .strict() as ZodType<Omit<UpdateAlumniType, "img_alumni" | "_id">>;
+    .strict() as ZodType<Omit<UpdateAlumniType, "img_alumni" | "id">>;
 }

@@ -1,6 +1,6 @@
 // payload
 export type PayloadType = {
-  id: string;
+  id: number;
   email: string;
   name: string;
   role: "admin";

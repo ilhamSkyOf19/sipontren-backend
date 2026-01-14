@@ -22,7 +22,7 @@ export type ResponseMessage = {
 export interface TokenRequest<params = {}, _ = {}, body = {}, query = {}>
   extends Request<params, _, body, query> {
   data?: {
-    id: string;
+    id: number;
     name: string;
     email: string;
     role: string;

@@ -5,37 +5,37 @@ import {
   UpdateNewsType,
   toResponseNews,
 } from "../models/news-model";
-import { NewsModel } from "../schemas/news.shcema";
 import { ResponseData, ResponseMessage } from "../types/types";
 import { FileService } from "./file.service";
+import { prisma } from "../lib/prismaClient";
 
 export class NewsService {
+  // =======================
   // CREATE
+  // =======================
   static async create(
     req: CreateNewsType,
     thumbnail: string
   ): Promise<ResponseData<ResponseNewsType>> {
-    const created = await NewsModel.create({
-      category: req.category,
-      title: req.title,
-      content: req.content,
-      thumbnail,
+    const created = await prisma.news.create({
+      data: {
+        category: req.category,
+        title: req.title,
+        content: req.content,
+        thumbnail,
+      },
     });
-
-    // generate url
-    const url_thumbnail = `${process.env.BASE_URL}/uploads/news/${thumbnail}`;
 
     return {
       success: true,
       message: "Berhasil membuat news",
-      data: toResponseNews({
-        ...created.toObject(),
-        url_thumbnail,
-      }),
+      data: toResponseNews(created),
     };
   }
 
-  // READ ALL
+  // =======================
+  // READ ALL (TODAY)
+  // =======================
   static async read(): Promise<ResponseData<ResponseNewsType[]>> {
     const startOfToday = new Date();
     startOfToday.setHours(0, 0, 0, 0);
@@ -43,38 +43,34 @@ export class NewsService {
     const endOfToday = new Date();
     endOfToday.setHours(23, 59, 59, 999);
 
-    const newsList = await NewsModel.find({
-      createdAt: {
-        $gte: startOfToday,
-        $lte: endOfToday,
+    const newsList = await prisma.news.findMany({
+      where: {
+        createdAt: {
+          gte: startOfToday,
+          lte: endOfToday,
+        },
       },
-    })
-      .sort({ createdAt: -1 })
-      .limit(8);
-
-    const data = newsList.map((news) => {
-      const url_thumbnail = `${process.env.BASE_URL}/uploads/news/${news.thumbnail}`;
-      return toResponseNews({
-        ...news.toObject(),
-        url_thumbnail,
-      });
+      orderBy: { createdAt: "desc" },
+      take: 8,
     });
 
     return {
       success: true,
       message: "Berhasil membaca semua news",
-      data,
+      data: newsList.map(toResponseNews),
     };
   }
 
+  // =======================
+  // READ BY FILTER
+  // =======================
   static async readByFilter(
     filter: NewsFilterType = "today"
   ): Promise<ResponseData<ResponseNewsType[]>> {
     const now = new Date();
     let startDate: Date;
-    let endDate: Date = new Date();
 
-    // end date selalu sekarang / akhir hari
+    const endDate = new Date();
     endDate.setHours(23, 59, 59, 999);
 
     switch (filter) {
@@ -85,7 +81,7 @@ export class NewsService {
 
       case "week":
         startDate = new Date();
-        startDate.setDate(now.getDate() - now.getDay()); // awal minggu (minggu)
+        startDate.setDate(now.getDate() - now.getDay());
         startDate.setHours(0, 0, 0, 0);
         break;
 
@@ -99,33 +95,31 @@ export class NewsService {
         startDate.setHours(0, 0, 0, 0);
     }
 
-    const newsList = await NewsModel.find({
-      createdAt: {
-        $gte: startDate,
-        $lte: endDate,
+    const newsList = await prisma.news.findMany({
+      where: {
+        createdAt: {
+          gte: startDate,
+          lte: endDate,
+        },
       },
-    })
-      .sort({ createdAt: -1 })
-      .limit(8);
-
-    const data = newsList.map((news) => {
-      const url_thumbnail = `${process.env.BASE_URL}/uploads/news/${news.thumbnail}`;
-      return toResponseNews({
-        ...news.toObject(),
-        url_thumbnail,
-      });
+      orderBy: { createdAt: "desc" },
+      take: 8,
     });
 
     return {
       success: true,
       message: "Berhasil membaca news",
-      data,
+      data: newsList.map(toResponseNews),
     };
   }
 
+  // =======================
   // DETAIL
-  static async detail(_id: string): Promise<ResponseData<ResponseNewsType>> {
-    const news = await NewsModel.findById(_id);
+  // =======================
+  static async detail(id: number): Promise<ResponseData<ResponseNewsType>> {
+    const news = await prisma.news.findUnique({
+      where: { id },
+    });
 
     if (!news) {
       return {
@@ -134,25 +128,24 @@ export class NewsService {
       };
     }
 
-    const url_thumbnail = `${process.env.BASE_URL}/uploads/news/${news.thumbnail}`;
-
     return {
       success: true,
       message: "Berhasil mengambil detail news",
-      data: toResponseNews({
-        ...news.toObject(),
-        url_thumbnail,
-      }),
+      data: toResponseNews(news),
     };
   }
 
+  // =======================
   // UPDATE
+  // =======================
   static async update(
-    _id: string,
+    id: number,
     req: UpdateNewsType,
     thumbnail?: string
   ): Promise<ResponseData<ResponseNewsType>> {
-    const existing = await NewsModel.findById(_id);
+    const existing = await prisma.news.findUnique({
+      where: { id },
+    });
 
     if (!existing) {
       return {
@@ -161,39 +154,35 @@ export class NewsService {
       };
     }
 
-    // Jika ada thumbnail baru → hapus lama
     let finalThumbnail = existing.thumbnail;
+
     if (thumbnail) {
       await FileService.deleteFormPath(existing.thumbnail, "news");
       finalThumbnail = thumbnail;
     }
 
-    // Update database
-    await NewsModel.updateOne(
-      { _id },
-      {
+    const updated = await prisma.news.update({
+      where: { id },
+      data: {
         ...req,
         thumbnail: finalThumbnail,
-      }
-    );
-
-    // Ambil data terbaru
-    const updated = await NewsModel.findById(_id);
-    const url_thumbnail = `${process.env.BASE_URL}/uploads/news/${finalThumbnail}`;
+      },
+    });
 
     return {
       success: true,
       message: "Berhasil update news",
-      data: toResponseNews({
-        ...updated!.toObject(),
-        url_thumbnail,
-      }),
+      data: toResponseNews(updated),
     };
   }
 
+  // =======================
   // DELETE
-  static async delete(_id: string): Promise<ResponseMessage> {
-    const news = await NewsModel.findById(_id);
+  // =======================
+  static async delete(id: number): Promise<ResponseMessage> {
+    const news = await prisma.news.findUnique({
+      where: { id },
+    });
 
     if (!news) {
       return {
@@ -202,10 +191,10 @@ export class NewsService {
       };
     }
 
-    // Delete DB
-    await NewsModel.deleteOne({ _id });
+    await prisma.news.delete({
+      where: { id },
+    });
 
-    // Delete file
     await FileService.deleteFormPath(news.thumbnail, "news");
 
     return {
