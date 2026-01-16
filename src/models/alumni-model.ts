@@ -33,6 +33,17 @@ export type ResponseAlumniType = {
   updatedAt: Date;
 };
 
+// response with meta
+export type ResponseAlumniWithMetaType = {
+  data: ResponseAlumniType[];
+  meta: {
+    currentPage: number;
+    totalPage: number;
+    totalData: number;
+    pageSize: number;
+  };
+};
+
 // Mapper: Mongoose Document → Response DTO
 export const toResponseAlumniType = (alumni: IAlumni): ResponseAlumniType => {
   return {
@@ -44,4 +55,10 @@ export const toResponseAlumniType = (alumni: IAlumni): ResponseAlumniType => {
     createdAt: alumni.createdAt,
     updatedAt: alumni.updatedAt,
   };
+};
+
+// filter data
+export type FilterData = {
+  search?: string;
+  page?: string;
 };

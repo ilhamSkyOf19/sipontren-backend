@@ -2,7 +2,9 @@ import { NextFunction, Request, Response } from "express";
 import { ResponseData, ResponseMessage } from "../types/types";
 import {
   CreateAlumniType,
+  FilterData,
   ResponseAlumniType,
+  ResponseAlumniWithMetaType,
   UpdateAlumniType,
 } from "../models/alumni-model";
 import { AlumniService } from "../services/alumni.service";
@@ -50,12 +52,18 @@ export class AlumniController {
 
   // READ
   static async read(
-    _req: Request,
-    res: Response<ResponseData<ResponseAlumniType[]>>,
+    req: Request<{}, {}, {}, FilterData>,
+    res: Response<ResponseData<ResponseAlumniWithMetaType>>,
     next: NextFunction
   ) {
     try {
-      const response = await AlumniService.read();
+      // destructure
+      const { page, search } = req.query;
+
+      const response = await AlumniService.read({
+        page,
+        search,
+      });
 
       return res.status(200).json({
         success: true,

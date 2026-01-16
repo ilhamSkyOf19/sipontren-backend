@@ -3,6 +3,8 @@ import {
   UpdateAlumniType,
   ResponseAlumniType,
   toResponseAlumniType,
+  ResponseAlumniWithMetaType,
+  FilterData,
 } from "../models/alumni-model";
 import { ResponseData, ResponseMessage } from "../types/types";
 import { FileService } from "./file.service";
@@ -31,13 +33,45 @@ export class AlumniService {
   // =======================
   // READ ALL
   // =======================
-  static async read(): Promise<ResponseAlumniType[]> {
-    const response = await prisma.alumni.findMany({
-      orderBy: { createdAt: "desc" },
-      take: 10,
+  static async read({
+    search,
+    page = "1",
+  }: FilterData): Promise<ResponseAlumniWithMetaType> {
+    const pageSize = 5;
+    const currentPage = +page < 1 ? 1 : +page;
+
+    // total data
+    const totalData = await prisma.alumni.count({
+      where: {
+        name: {
+          contains: search,
+        },
+      },
     });
 
-    return response.map(toResponseAlumniType);
+    // get total page
+    const totalPage = Math.ceil(totalData / pageSize);
+
+    const response = await prisma.alumni.findMany({
+      where: {
+        name: {
+          contains: search,
+        },
+      },
+      skip: (currentPage - 1) * pageSize,
+      take: pageSize,
+      orderBy: { createdAt: "desc" },
+    });
+
+    return {
+      data: response.map(toResponseAlumniType),
+      meta: {
+        currentPage,
+        totalPage,
+        totalData,
+        pageSize,
+      },
+    };
   }
 
   // =======================
