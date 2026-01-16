@@ -54,6 +54,16 @@ export type ResponseStudentType = Omit<IStudent, "tanggal_lahir"> & {
   tanggal_lahir: Date;
 };
 
+export type ResponseStudentWithMetaType = {
+  data: ResponseStudentType[];
+  meta: {
+    currentPage: number;
+    totalPage: number;
+    totalData: number;
+    pageSize: number;
+  };
+};
+
 // To response (mengubah mongoose document menjadi ResponseStudentType)
 export const toResponseStudentType = (
   student: Omit<IStudent, "tanggal_lahir"> & { tanggal_lahir: Date }

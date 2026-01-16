@@ -3,9 +3,10 @@ import {
   CreateStudentType,
   FileStudent,
   ResponseStudentType,
+  ResponseStudentWithMetaType,
   UpdateStudentType,
 } from "../models/student-model";
-import { ResponseData, ResponseMessage } from "../types/types";
+import { FilterData, ResponseData, ResponseMessage } from "../types/types";
 import { validation } from "../services/validation.service";
 import { StudentValidation } from "../validations/student-validation";
 import { FileService } from "../services/file.service";
@@ -15,12 +16,21 @@ import archiver from "archiver";
 export class StudentController {
   // read all students
   static async read(
-    req: Request,
-    res: Response<ResponseData<ResponseStudentType[]>>,
+    req: Request<{}, {}, {}, FilterData>,
+    res: Response<ResponseData<ResponseStudentWithMetaType>>,
     next: NextFunction
   ) {
     try {
-      const response = await StudentService.read();
+      // get query
+      const { from, search, to, page, jenis_kelamin } = req.query;
+
+      const response = await StudentService.read({
+        from,
+        search,
+        to,
+        page,
+        jenis_kelamin,
+      });
 
       return res.status(200).json({
         success: true,

@@ -28,3 +28,11 @@ export interface TokenRequest<params = {}, _ = {}, body = {}, query = {}>
     role: string;
   };
 }
+
+export type FilterData = {
+  from?: string;
+  to?: string;
+  search?: string;
+  page?: string;
+  jenis_kelamin?: "laki_laki" | "perempuan";
+};

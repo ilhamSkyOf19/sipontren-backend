@@ -71,6 +71,8 @@ model student {
   no_telepon          String
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
+
+  @@index([createdAt, jenis_kelamin, nama_lengkap])
 }
 
 model ustad {

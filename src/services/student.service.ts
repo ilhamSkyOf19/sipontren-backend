@@ -3,10 +3,12 @@ import {
   CreateStudentType,
   FileStudent,
   ResponseStudentType,
+  ResponseStudentWithMetaType,
   UpdateStudentType,
   toResponseStudentType,
 } from "../models/student-model";
-import { ResponseData, ResponseMessage } from "../types/types";
+import { FilterData, ResponseData, ResponseMessage } from "../types/types";
+import { getEndOfToday, getStartOfToday, toEndOfDay } from "../utils/utils";
 import { FileService } from "./file.service";
 
 export class StudentService {
@@ -33,17 +35,68 @@ export class StudentService {
   }
 
   // READ ALL
-  static async read(): Promise<ResponseStudentType[]> {
+  static async read({
+    from,
+    search,
+    to,
+    page = "1",
+    jenis_kelamin,
+  }: FilterData): Promise<ResponseStudentWithMetaType> {
+    const pageSize = 5;
+    const currentPage = +page < 1 ? 1 : +page;
+
+    // filter reusable
+    const whereCondition = {
+      AND: [
+        // SEARCH NAMA
+        search
+          ? {
+              OR: [{ nama_lengkap: { contains: search } }],
+            }
+          : {},
+
+        // FILTER TANGGAL
+        {
+          createdAt: {
+            gte: from ? new Date(from) : getStartOfToday(),
+            lte: to ? toEndOfDay(to) : getEndOfToday(),
+          },
+        },
+
+        // FILTER JENIS KELAMIN (opsional)
+        jenis_kelamin
+          ? {
+              jenis_kelamin: jenis_kelamin,
+            }
+          : {},
+      ],
+    };
+
+    // total data
+    const totalData = await prisma.student.count({
+      where: whereCondition,
+    });
+
+    // get total page
+    const totalPage = Math.ceil(totalData / pageSize);
+
+    // ambil data per halaman
     const students = await prisma.student.findMany({
+      where: whereCondition,
+      skip: (currentPage - 1) * pageSize,
+      take: pageSize,
       orderBy: { createdAt: "desc" },
     });
 
-    return students.map((item) =>
-      toResponseStudentType({
-        ...item,
-        tanggal_lahir: item.tanggal_lahir,
-      })
-    );
+    return {
+      data: students.map((item) => toResponseStudentType(item)),
+      meta: {
+        currentPage,
+        totalData,
+        totalPage,
+        pageSize,
+      },
+    };
   }
 
   // DETAIL
