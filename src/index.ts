@@ -38,7 +38,7 @@ app.use(
     },
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     credentials: true,
-  })
+  }),
 );
 
 // 3. Cookie Parser
@@ -53,7 +53,11 @@ app.use(express.static(path.join(__dirname, "../public")));
 
 // 6. Test route
 app.get("/", (_req, res) => {
-  res.send("Hello World! (Prisma + MySQL Ready)");
+  res.send("Server Ready");
+});
+
+app.get("/api/ping", (_req, res) => {
+  res.send("pong");
 });
 
 // 7. Routes

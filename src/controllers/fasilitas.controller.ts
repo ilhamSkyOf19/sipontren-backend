@@ -2,7 +2,9 @@ import { NextFunction, Request, Response } from "express";
 import { ResponseData, ResponseMessage } from "../types/types";
 import {
   CreateFasilitasType,
+  FilterData,
   ResponseFasilitasType,
+  ResponseFasilitasWithMetaType,
   UpdateFasilitasType,
 } from "../models/fasilitas-model";
 import { FasilitasService } from "../services/fasilitas.service";
@@ -15,7 +17,7 @@ export class FasilitasController {
   static async create(
     req: Request<{}, {}, CreateFasilitasType>,
     res: Response<ResponseData<ResponseFasilitasType>>,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
       if (!req.file) {
@@ -27,7 +29,7 @@ export class FasilitasController {
 
       const body = validation<CreateFasilitasType>(
         FasilitasValidation.CREATE,
-        req.body
+        req.body,
       );
 
       if (!body.success) {
@@ -56,12 +58,15 @@ export class FasilitasController {
 
   // READ
   static async read(
-    _req: Request,
-    res: Response<ResponseData<ResponseFasilitasType[]>>,
-    next: NextFunction
+    req: Request<{}, {}, {}, FilterData>,
+    res: Response<ResponseData<ResponseFasilitasWithMetaType>>,
+    next: NextFunction,
   ) {
     try {
-      const response = await FasilitasService.read();
+      // get query from params
+      const { page, search } = req.query;
+
+      const response = await FasilitasService.read({ page, search });
 
       return res.status(200).json({
         success: true,
@@ -78,7 +83,7 @@ export class FasilitasController {
   static async detail(
     req: Request<{ id: string }>,
     res: Response<ResponseData<ResponseFasilitasType>>,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
       const id = req.params.id;
@@ -100,14 +105,14 @@ export class FasilitasController {
   static async update(
     req: Request<{ id: string }, {}, UpdateFasilitasType>,
     res: Response<ResponseData<ResponseFasilitasType>>,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
       const id = req.params.id;
 
       const body = validation<UpdateFasilitasType>(
         FasilitasValidation.UPDATE,
-        req.body
+        req.body,
       );
 
       if (!body.success) {
@@ -138,7 +143,7 @@ export class FasilitasController {
   static async delete(
     req: Request<{ id: string }>,
     res: Response<ResponseData<ResponseFasilitasType | null>>,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
       const id = req.params.id;

@@ -10,29 +10,32 @@ const upload = createMulterUploader({
   uploadPaths: { img_alumni: "public/uploads/img_alumni" },
 });
 
+// read
+alumniRoute.get("/read", AlumniController.read);
+
+// auth middleware
+alumniRoute.use(tokenMiddleware);
+
 // create
 alumniRoute.post(
   "/create",
   tokenMiddleware,
   upload.single("img_alumni"),
-  AlumniController.create
+  AlumniController.create,
 );
 
-// read
-alumniRoute.get("/read", AlumniController.read);
-
 // detail
-alumniRoute.get("/detail/:id", tokenMiddleware, AlumniController.detail);
+alumniRoute.get("/detail/:id", AlumniController.detail);
 
 // update
 alumniRoute.patch(
   "/update/:id",
   tokenMiddleware,
   upload.single("img_alumni"),
-  AlumniController.update
+  AlumniController.update,
 );
 
 // delete
-alumniRoute.delete("/delete/:id", tokenMiddleware, AlumniController.delete);
+alumniRoute.delete("/delete/:id", AlumniController.delete);
 
 export default alumniRoute;

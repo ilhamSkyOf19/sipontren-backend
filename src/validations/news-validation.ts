@@ -1,38 +1,49 @@
 import z, { ZodType } from "zod";
 import { CreateNewsType, UpdateNewsType } from "../models/news-model";
 
+// helper sederhana
+const minWords = (n: number) => (val: string) =>
+  val.trim().split(/\s+/).length >= n;
+
 export class NewsValidation {
+  private static titleSchema = z
+    .string("title harus diisi")
+    .trim()
+    .min(5, { message: "title minimal 5 karakter" })
+    .max(200, { message: "title maksimal 200 karakter" })
+    .refine(minWords(2), {
+      message: "title minimal terdiri dari 2 kata",
+    });
 
-    // create 
-    static readonly CREATE = z.object({
-        title: z.string({
-            error: (val) => val.input === undefined ? 'title harus diisi' : 'title harus berupa string'
-        }),
-        content: z.string({
-            error: (val) => val.input === undefined ? 'content harus diisi' : 'content harus berupa string'
-        }),
-        category: z.enum(['berita', 'artikel'], {
-            error: (val) => val.input === undefined ? 'categrory harus diisi' : 'categrory tidak sesuai'
-        }),
+  private static contentSchema = z
+    .string("content harus diisi")
+    .trim()
+    .min(20, { message: "content minimal 20 karakter" })
+    .max(3000, { message: "content maksimal 3000 karakter" })
+    .refine(minWords(5), {
+      message: "content minimal terdiri dari 5 kata",
+    });
 
-    }).strict() as ZodType<CreateNewsType>;
+  private static categorySchema = z.enum(
+    ["berita", "artikel"],
+    "category harus diisi",
+  );
 
+  // CREATE
+  static readonly CREATE = z
+    .object({
+      title: this.titleSchema,
+      content: this.contentSchema,
+      category: this.categorySchema,
+    })
+    .strict() satisfies ZodType<CreateNewsType>;
 
-    // update 
-    static readonly UPDATE = z.object({
-        title: z.string({
-            error: (val) => val.input === undefined ? 'title harus diisi' : 'title harus berupa string'
-        })
-            .min(1, { message: 'title harus diisi' })
-            .optional(),
-        content: z.string({
-            error: (val) => val.input === undefined ? 'content harus diisi' : 'content harus berupa string'
-        })
-            .min(1, { message: 'content harus diisi' })
-            .optional(),
-        category: z.enum(['berita', 'artikel'], {
-            error: (val) => val.input === undefined ? 'categrory harus diisi' : 'categrory tidak sesuai'
-        }).optional(),
-
-    }).strict() as ZodType<UpdateNewsType>;
+  // UPDATE
+  static readonly UPDATE = z
+    .object({
+      title: this.titleSchema.optional(),
+      content: this.contentSchema.optional(),
+      category: this.categorySchema.optional(),
+    })
+    .strict() satisfies ZodType<UpdateNewsType>;
 }

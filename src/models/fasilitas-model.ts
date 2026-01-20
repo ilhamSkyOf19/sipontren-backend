@@ -24,9 +24,19 @@ export type ResponseFasilitasType = {
   updatedAt: Date;
 };
 
+export type ResponseFasilitasWithMetaType = {
+  data: ResponseFasilitasType[];
+  meta: {
+    currentPage: number;
+    totalPage: number;
+    totalData: number;
+    pageSize: number;
+  };
+};
+
 // Mapper dari Mongoose Document ke Response
 export const toResponseFasilitasType = (
-  fasilitas: IFasilitas
+  fasilitas: IFasilitas,
 ): ResponseFasilitasType => ({
   id: fasilitas.id,
   fasilitas: fasilitas.fasilitas,
@@ -35,3 +45,9 @@ export const toResponseFasilitasType = (
   createdAt: fasilitas.createdAt,
   updatedAt: fasilitas.updatedAt,
 });
+
+// filter data
+export type FilterData = {
+  search?: string;
+  page?: string;
+};

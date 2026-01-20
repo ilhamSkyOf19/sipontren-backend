@@ -23,7 +23,7 @@ model alumni {
   name        String
   angkatan    String
   img_alumni  String
-  description String
+  description String   @db.Text
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -32,7 +32,7 @@ model news {
   id        Int           @id @default(autoincrement())
   category  news_category @default(berita)
   title     String
-  content   String
+  content   String        @db.MediumText
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
   thumbnail String
@@ -62,7 +62,7 @@ model student {
   alamat_sekolah_asal String
   nama_lengkap_ayah   String
   nama_lengkap_ibu    String
-  nama_lengkap_wali   String
+  nama_lengkap_wali   String?               @default("-")
   foto_formal         String
   fc_akta_kelahiran   String
   foto_kk             String

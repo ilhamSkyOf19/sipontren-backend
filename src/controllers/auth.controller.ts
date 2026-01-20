@@ -8,7 +8,7 @@ export class AuthController {
   static async cekAuth(
     req: TokenRequest,
     res: Response<ResponseData<PayloadType>>,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
       // cek data token
@@ -31,7 +31,7 @@ export class AuthController {
   static async login(
     req: Request<{}, {}, LoginType>,
     res: Response<ResponseData<string>>,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
       // get body
@@ -45,20 +45,22 @@ export class AuthController {
         return res.status(400).json(response);
       }
 
-      // set cookie
-      res.cookie("token", response.data, {
+      const isProduction = process.env.NODE_ENV === "production";
+
+      // Clear cookie
+      res.clearCookie("token", {
         httpOnly: true,
-        secure: true,
-        sameSite: "none",
-        maxAge: 24 * 60 * 60 * 1000,
+        secure: isProduction,
+        sameSite: isProduction ? "none" : "lax",
       });
 
-      // res.cookie("token", response.data, {
-      //   httpOnly: true,
-      //   secure: false,
-      //   sameSite: "lax",
-      //   maxAge: 24 * 60 * 60 * 1000,
-      // });
+      // Set cookie
+      res.cookie("token", response.data, {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? "none" : "lax",
+        maxAge: 60 * 60 * 24 * 1000, // 1 day
+      });
 
       // return response
       return res.status(200).json({
@@ -77,7 +79,7 @@ export class AuthController {
   static async logout(
     _req: Request,
     res: Response<ResponseMessage>,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
       // delete cookie

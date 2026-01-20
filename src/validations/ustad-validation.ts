@@ -2,131 +2,75 @@ import z, { ZodType } from "zod";
 import { CreateUstadType, UpdateUstadType } from "../models/ustad-model";
 
 export class UstadValidation {
-  // create
+  // ================= SCHEMA DASAR =================
+
+  private static nameSchema = z
+    .string("nama harus diisi")
+    .trim()
+    .min(3, "nama minimal 3 karakter")
+    .max(70, "nama maksimal 70 karakter");
+
+  private static jenisKelaminSchema = z.enum(
+    ["laki_laki", "perempuan"],
+    "jenis kelamin harus diisi",
+  );
+
+  private static tempatLahirSchema = z
+    .string("tempat lahir harus diisi")
+    .trim()
+    .min(3, "tempat lahir minimal 3 karakter")
+    .max(50, "tempat lahir maksimal 50 karakter");
+
+  // 👉 tetap STRING sesuai kode kamu
+  private static tanggalLahirSchema = z
+    .string("tanggal lahir harus diisi")
+    .trim()
+    .min(4, "tanggal lahir tidak boleh kosong");
+
+  private static alamatSchema = z
+    .string("alamat harus diisi")
+    .trim()
+    .min(10, "alamat minimal 10 karakter agar lebih lengkap")
+    .max(200, "alamat maksimal 200 karakter");
+
+  private static noTeleponSchema = z
+    .string("nomor telepon harus diisi")
+    .trim()
+    .regex(/^[0-9]+$/, "nomor telepon hanya boleh berisi angka")
+    .min(10, "nomor telepon minimal 10 digit")
+    .max(14, "nomor telepon maksimal 14 digit");
+
+  private static jabatanSchema = z
+    .string("jabatan harus diisi")
+    .trim()
+    .min(3, "jabatan minimal 3 karakter")
+    .max(50, "jabatan maksimal 50 karakter");
+
+  // ================= CREATE =================
+
   static readonly CREATE = z
     .object({
-      name: z
-        .string({
-          error: (val) =>
-            val.input === undefined
-              ? "nama harus diisi"
-              : "nama harus berupa string",
-        })
-        .min(3, { message: "nama minimal 3 karakter" }),
-
-      jenis_kelamin: z.enum(["laki_laki", "perempuan"], {
-        error: (val) =>
-          val.input === undefined
-            ? "jenis kelamin harus diisi"
-            : "jenis kelamin tidak sesuai",
-      }),
-
-      tempat_lahir: z.string({
-        error: (val) =>
-          val.input === undefined
-            ? "tempat lahir harus diisi"
-            : "tempat lahir harus berupa string",
-      }),
-
-      tanggal_lahir: z.string({
-        error: (val) =>
-          val.input === undefined
-            ? "tanggal lahir harus diisi"
-            : "tanggal lahir harus berupa string",
-      }),
-
-      alamat: z.string({
-        error: (val) =>
-          val.input === undefined
-            ? "alamat harus diisi"
-            : "alamat harus berupa string",
-      }),
-
-      no_telepon: z
-        .string({
-          error: (val) =>
-            val.input === undefined
-              ? "nomor telepon harus diisi"
-              : "nomor telepon harus berupa string",
-        })
-        .regex(/^[0-9]+$/, { message: "nomor telepon hanya boleh angka" }),
-
-      jabatan: z.string({
-        error: (val) =>
-          val.input === undefined
-            ? "jabatan harus diisi"
-            : "jabatan harus berupa string",
-      }),
+      name: this.nameSchema,
+      jenis_kelamin: this.jenisKelaminSchema,
+      tempat_lahir: this.tempatLahirSchema,
+      tanggal_lahir: this.tanggalLahirSchema,
+      alamat: this.alamatSchema,
+      no_telepon: this.noTeleponSchema,
+      jabatan: this.jabatanSchema,
     })
-    .strict() as ZodType<Omit<CreateUstadType, "ustad_img">>;
+    .strict() satisfies ZodType<Omit<CreateUstadType, "ustad_img">>;
 
-  // update
+  // ================= UPDATE =================
+
   static readonly UPDATE = z
     .object({
-      name: z
-        .string({
-          error: (val) =>
-            val.input === undefined
-              ? "nama harus diisi"
-              : "nama harus berupa string",
-        })
-        .min(3, { message: "nama minimal 3 karakter" })
-        .optional(),
-
-      jenis_kelamin: z
-        .enum(["laki_laki", "perempuan"], {
-          error: (val) =>
-            val.input === undefined
-              ? "jenis kelamin harus diisi"
-              : "jenis kelamin tidak sesuai",
-        })
-        .optional(),
-
-      tempat_lahir: z
-        .string({
-          error: (val) =>
-            val.input === undefined
-              ? "tempat lahir harus diisi"
-              : "tempat lahir harus berupa string",
-        })
-        .optional(),
-
-      tanggal_lahir: z
-        .string({
-          error: (val) =>
-            val.input === undefined
-              ? "tanggal lahir harus diisi"
-              : "tanggal lahir harus berupa string",
-        })
-        .optional(),
-
-      alamat: z
-        .string({
-          error: (val) =>
-            val.input === undefined
-              ? "alamat harus diisi"
-              : "alamat harus berupa string",
-        })
-        .optional(),
-
-      no_telepon: z
-        .string({
-          error: (val) =>
-            val.input === undefined
-              ? "nomor telepon harus diisi"
-              : "nomor telepon harus berupa string",
-        })
-        .regex(/^[0-9]+$/, { message: "nomor telepon hanya boleh angka" })
-        .optional(),
-
-      jabatan: z
-        .string({
-          error: (val) =>
-            val.input === undefined
-              ? "jabatan harus diisi"
-              : "jabatan harus berupa string",
-        })
-        .optional(),
+      name: this.nameSchema.optional(),
+      jenis_kelamin: this.jenisKelaminSchema.optional(),
+      tempat_lahir: this.tempatLahirSchema.optional(),
+      tanggal_lahir: this.tanggalLahirSchema.optional(),
+      alamat: this.alamatSchema.optional(),
+      no_telepon: this.noTeleponSchema.optional(),
+      jabatan: this.jabatanSchema.optional(),
     })
-    .strict() as ZodType<Omit<UpdateUstadType, "ustad_img" | "id">>;
+    .strict() satisfies ZodType<Omit<UpdateUstadType, "ustad_img" | "id">>;
 }

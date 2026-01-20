@@ -5,29 +5,33 @@ import {
 } from "../models/fasilitas-model";
 
 export class FasilitasValidation {
-  // CREATE – semua field wajib (tanpa _id & images)
+  // ================ SCHEMA DASAR ================
+
+  private static fasilitasSchema = z
+    .string()
+    .min(3, { message: "nama fasilitas minimal 3 karakter" })
+    .max(50, { message: "nama fasilitas maksimal 50 karakter" });
+
+  private static keteranganSchema = z
+    .string()
+    .min(5, { message: "keterangan minimal 5 karakter" })
+    .max(70, { message: "keterangan maksimal 70 karakter" });
+
+  // ================ CREATE ================
+
   static readonly CREATE = z
     .object({
-      fasilitas: z
-        .string()
-        .min(3, { message: "nama fasilitas minimal 3 karakter" }),
-      keterangan: z
-        .string()
-        .min(5, { message: "keterangan minimal 5 karakter" }),
+      fasilitas: this.fasilitasSchema,
+      keterangan: this.keteranganSchema,
     })
-    .strict() as ZodType<CreateFasilitasType>;
+    .strict() satisfies ZodType<CreateFasilitasType>;
 
-  // UPDATE – semua field optional (tanpa _id & images)
+  // ================ UPDATE ================
+
   static readonly UPDATE = z
     .object({
-      fasilitas: z
-        .string()
-        .min(3, { message: "nama fasilitas minimal 3 karakter" })
-        .optional(),
-      keterangan: z
-        .string()
-        .min(5, { message: "keterangan minimal 5 karakter" })
-        .optional(),
+      fasilitas: this.fasilitasSchema.optional(),
+      keterangan: this.keteranganSchema.optional(),
     })
-    .strict() as ZodType<UpdateFasilitasType>;
+    .strict() satisfies ZodType<UpdateFasilitasType>;
 }

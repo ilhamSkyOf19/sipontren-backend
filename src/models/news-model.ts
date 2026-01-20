@@ -30,6 +30,16 @@ export type ResponseNewsType = CreateNewsType & {
   updatedAt: Date;
 };
 
+export type ResponseNewsWithMetaType = {
+  data: ResponseNewsType[];
+  meta: {
+    currentPage: number;
+    totalPage: number;
+    totalData: number;
+    pageSize: number;
+  };
+};
+
 // to response
 export const toResponseNews = (news: INews): ResponseNewsType => {
   return {
@@ -41,4 +51,11 @@ export const toResponseNews = (news: INews): ResponseNewsType => {
     createdAt: news.createdAt,
     updatedAt: news.updatedAt,
   };
+};
+
+export type FilterData = {
+  from?: string;
+  to?: string;
+  search?: string;
+  page?: string;
 };

@@ -2,32 +2,51 @@ import z, { ZodType } from "zod";
 import { CreateAlumniType, UpdateAlumniType } from "../models/alumni-model";
 
 export class AlumniValidation {
-  // CREATE – semua field wajib kecuali _id
+  // ================= SCHEMA DASAR =================
+
+  private static nameSchema = z
+    .string("Nama harus diisi")
+    .trim()
+    .min(3, { message: "Nama minimal 3 karakter" })
+    .max(100, { message: "Nama maksimal 100 karakter" })
+    .regex(/^[a-zA-Z\s'.-]+$/, {
+      message: "Nama hanya boleh berisi huruf dan tanda umum ( ' . - )",
+    });
+
+  private static angkatanSchema = z
+    .string()
+    .trim()
+    .min(2, { message: "Angkatan minimal 2 karakter" })
+    .max(20, { message: "Angkatan maksimal 20 karakter" })
+    .regex(/^[0-9A-Za-z\s/-]+$/, {
+      message: "Format angkatan tidak valid",
+    });
+
+  private static descriptionSchema = z
+    .string()
+    .trim()
+    .min(10, { message: "Deskripsi minimal 10 karakter" })
+    .max(1000, {
+      message: "Deskripsi terlalu panjang ",
+    });
+
+  // ================= CREATE =================
+
   static readonly CREATE = z
     .object({
-      name: z.string().min(3, { message: "nama minimal 3 karakter" }),
-      angkatan: z.string().min(2, { message: "angkatan minimal 2 karakter" }),
-      description: z
-        .string()
-        .min(5, { message: "deskripsi minimal 5 karakter" }),
+      name: this.nameSchema,
+      angkatan: this.angkatanSchema,
+      description: this.descriptionSchema,
     })
     .strict() as ZodType<Omit<CreateAlumniType, "img_alumni">>;
 
-  // UPDATE – semua field optional kecuali _id
+  // ================= UPDATE =================
+
   static readonly UPDATE = z
     .object({
-      name: z
-        .string()
-        .min(3, { message: "nama minimal 3 karakter" })
-        .optional(),
-      angkatan: z
-        .string()
-        .min(2, { message: "angkatan minimal 2 karakter" })
-        .optional(),
-      description: z
-        .string()
-        .min(5, { message: "deskripsi minimal 5 karakter" })
-        .optional(),
+      name: this.nameSchema.optional(),
+      angkatan: this.angkatanSchema.optional(),
+      description: this.descriptionSchema.optional(),
     })
     .strict() as ZodType<Omit<UpdateAlumniType, "img_alumni" | "id">>;
 }

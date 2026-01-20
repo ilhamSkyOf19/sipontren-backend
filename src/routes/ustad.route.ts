@@ -1,4 +1,4 @@
-import express, { Router } from "express";
+import { Router } from "express";
 import { createMulterUploader } from "../services/multer.service";
 import { UstadController } from "../controllers/ustad.controller";
 import { tokenMiddleware } from "../middlewares/token-middleware";
@@ -11,30 +11,27 @@ const upload = createMulterUploader({
   uploadPaths: { ustad_img: "public/uploads/ustad_img" },
 });
 
-// create
-ustadRoute.post(
-  "/create",
-  tokenMiddleware,
-  upload.single("ustad_img"),
-  UstadController.create
-);
-
 // read
 ustadRoute.get("/read", UstadController.read);
 
+// auth middleware
+ustadRoute.use(tokenMiddleware);
+
+// create
+ustadRoute.post("/create", upload.single("ustad_img"), UstadController.create);
+
 // read detail
-ustadRoute.get("/detail/:id", tokenMiddleware, UstadController.detail);
+ustadRoute.get("/detail/:id", UstadController.detail);
 
 // update
 ustadRoute.patch(
   "/update/:id",
-  tokenMiddleware,
   upload.single("ustad_img"),
-  UstadController.update
+  UstadController.update,
 );
 
 // delete
-ustadRoute.delete("/delete/:id", tokenMiddleware, UstadController.delete);
+ustadRoute.delete("/delete/:id", UstadController.delete);
 
 // return
 export default ustadRoute;

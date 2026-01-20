@@ -26,6 +26,11 @@ const studentUpload = upload.fields([
   { name: "fc_kis_kip", limit: 1 },
 ]);
 
+// auth middleware
+studentRouter.use(tokenMiddleware);
+// download
+studentRouter.post("/download-files", StudentController.downloadFiles);
+
 // create
 studentRouter.post("/create", studentUpload, StudentController.create);
 
@@ -35,21 +40,16 @@ studentRouter.post("/download", StudentController.downloadMultiple);
 studentRouter.get("/read", StudentController.read);
 
 // detail
-studentRouter.get("/detail/:id", tokenMiddleware, StudentController.detail);
+studentRouter.get("/detail/:id", StudentController.detail);
 
 // update
-studentRouter.patch(
-  "/update/:id",
-  tokenMiddleware,
-  studentUpload,
-  StudentController.update
-);
+studentRouter.patch("/update/:id", studentUpload, StudentController.update);
 
 // delete
-studentRouter.delete("/delete/:id", tokenMiddleware, StudentController.delete);
+studentRouter.delete("/delete/:id", StudentController.delete);
 
 // search
-studentRouter.get("/search", tokenMiddleware, StudentController.search);
+studentRouter.get("/search", StudentController.search);
 
 // export
 export default studentRouter;

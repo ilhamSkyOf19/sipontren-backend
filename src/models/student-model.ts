@@ -17,7 +17,7 @@ export type IStudent = {
   alamat_sekolah_asal: string;
   nama_lengkap_ayah: string;
   nama_lengkap_ibu: string;
-  nama_lengkap_wali: string;
+  nama_lengkap_wali?: string;
 
   // files
   foto_formal: string;
@@ -66,7 +66,7 @@ export type ResponseStudentWithMetaType = {
 
 // To response (mengubah mongoose document menjadi ResponseStudentType)
 export const toResponseStudentType = (
-  student: Omit<IStudent, "tanggal_lahir"> & { tanggal_lahir: Date }
+  student: Omit<IStudent, "tanggal_lahir"> & { tanggal_lahir: Date },
 ): ResponseStudentType => {
   return {
     ...student,

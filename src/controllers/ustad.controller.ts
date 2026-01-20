@@ -2,7 +2,9 @@ import { NextFunction, Response, Request } from "express";
 import { ResponseData, ResponseMessage } from "../types/types";
 import {
   CreateUstadType,
+  FilterData,
   ResponseUstadType,
+  ResponseUstadWithMetaType,
   UpdateUstadType,
 } from "../models/ustad-model";
 import { UstadValidation } from "../validations/ustad-validation";
@@ -15,7 +17,7 @@ export class UstadController {
   static async create(
     req: Request<{}, {}, CreateUstadType>,
     res: Response<ResponseData<ResponseUstadType>>,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
       const rawBody = req.body;
@@ -28,7 +30,7 @@ export class UstadController {
 
       const body = validation<Omit<CreateUstadType, "ustad_img">>(
         UstadValidation.CREATE,
-        rawBody
+        rawBody,
       );
 
       if (!body.success) {
@@ -41,7 +43,7 @@ export class UstadController {
           ...body.data,
           ustad_img: req.file.filename,
         },
-        req.file.filename
+        req.file.filename,
       );
 
       return res.status(200).json({
@@ -57,12 +59,15 @@ export class UstadController {
 
   // read
   static async read(
-    _req: Request,
-    res: Response<ResponseData<ResponseUstadType[]>>,
-    next: NextFunction
+    req: Request<{}, {}, {}, FilterData>,
+    res: Response<ResponseData<ResponseUstadWithMetaType>>,
+    next: NextFunction,
   ) {
     try {
-      const response = await UstadService.read();
+      // get params from query
+      const { page, search } = req.query;
+
+      const response = await UstadService.read({ page, search });
 
       return res.status(200).json({
         success: true,
@@ -79,7 +84,7 @@ export class UstadController {
   static async detail(
     req: Request<{ id: string }>,
     res: Response<ResponseData<ResponseUstadType>>,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
       const id = req.params.id;
@@ -99,7 +104,7 @@ export class UstadController {
   static async update(
     req: Request<{ id: string }, {}, UpdateUstadType>,
     res: Response<ResponseData<ResponseUstadType>>,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
       const id = req.params.id;
@@ -113,7 +118,7 @@ export class UstadController {
 
       const body = validation<Omit<UpdateUstadType, "ustad_img" | "id">>(
         UstadValidation.UPDATE,
-        req.body
+        req.body,
       );
 
       if (!body.success) {
@@ -126,7 +131,7 @@ export class UstadController {
           ...body.data,
           id: ustad.data.id,
         },
-        req.file?.filename
+        req.file?.filename,
       );
 
       if (!response.success) return res.status(400).json(response);
@@ -142,7 +147,7 @@ export class UstadController {
   static async delete(
     req: Request<{ id: string }>,
     res: Response<ResponseMessage>,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
       const id = req.params.id;

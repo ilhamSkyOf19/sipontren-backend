@@ -1,13 +1,17 @@
 import {
   CreateNewsType,
+  FilterData,
   NewsFilterType,
   ResponseNewsType,
+  ResponseNewsWithMetaType,
   UpdateNewsType,
   toResponseNews,
 } from "../models/news-model";
 import { ResponseData, ResponseMessage } from "../types/types";
 import { FileService } from "./file.service";
 import { prisma } from "../lib/prismaClient";
+import { title } from "node:process";
+import { getEndOfToday, getStartOfToday, toEndOfDay } from "../utils/utils";
 
 export class NewsService {
   // =======================
@@ -15,7 +19,7 @@ export class NewsService {
   // =======================
   static async create(
     req: CreateNewsType,
-    thumbnail: string
+    thumbnail: string,
   ): Promise<ResponseData<ResponseNewsType>> {
     const created = await prisma.news.create({
       data: {
@@ -36,28 +40,60 @@ export class NewsService {
   // =======================
   // READ ALL (TODAY)
   // =======================
-  static async read(): Promise<ResponseData<ResponseNewsType[]>> {
-    const startOfToday = new Date();
-    startOfToday.setHours(0, 0, 0, 0);
+  // READ ALL
+  static async read({
+    from,
+    search,
+    to,
+    page = "1",
+  }: FilterData): Promise<ResponseNewsWithMetaType> {
+    const pageSize = 5;
+    const currentPage = +page < 1 ? 1 : +page;
 
-    const endOfToday = new Date();
-    endOfToday.setHours(23, 59, 59, 999);
+    // filter reusable
+    const whereCondition = {
+      AND: [
+        // SEARCH NAMA
+        search
+          ? {
+              OR: [{ title: { contains: search } }],
+            }
+          : {},
 
-    const newsList = await prisma.news.findMany({
-      where: {
-        createdAt: {
-          gte: startOfToday,
-          lte: endOfToday,
+        // FILTER TANGGAL
+        {
+          createdAt: {
+            gte: from ? new Date(from) : getStartOfToday(),
+            lte: to ? toEndOfDay(to) : getEndOfToday(),
+          },
         },
-      },
+      ],
+    };
+
+    // total data
+    const totalData = await prisma.news.count({
+      where: whereCondition,
+    });
+
+    // get total page
+    const totalPage = Math.ceil(totalData / pageSize);
+
+    // ambil data per halaman
+    const students = await prisma.news.findMany({
+      where: whereCondition,
+      skip: (currentPage - 1) * pageSize,
+      take: pageSize,
       orderBy: { createdAt: "desc" },
-      take: 8,
     });
 
     return {
-      success: true,
-      message: "Berhasil membaca semua news",
-      data: newsList.map(toResponseNews),
+      data: students.map((item) => toResponseNews(item)),
+      meta: {
+        currentPage,
+        totalData,
+        totalPage,
+        pageSize,
+      },
     };
   }
 
@@ -65,7 +101,7 @@ export class NewsService {
   // READ BY FILTER
   // =======================
   static async readByFilter(
-    filter: NewsFilterType = "today"
+    filter: NewsFilterType = "today",
   ): Promise<ResponseData<ResponseNewsType[]>> {
     const now = new Date();
     let startDate: Date;
@@ -141,7 +177,7 @@ export class NewsService {
   static async update(
     id: number,
     req: UpdateNewsType,
-    thumbnail?: string
+    thumbnail?: string,
   ): Promise<ResponseData<ResponseNewsType>> {
     const existing = await prisma.news.findUnique({
       where: { id },

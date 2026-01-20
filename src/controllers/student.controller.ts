@@ -18,7 +18,7 @@ export class StudentController {
   static async read(
     req: Request<{}, {}, {}, FilterData>,
     res: Response<ResponseData<ResponseStudentWithMetaType>>,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
       // get query
@@ -46,7 +46,7 @@ export class StudentController {
   static async detail(
     req: Request<{ id: string }>,
     res: Response<ResponseData<ResponseStudentType>>,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
       const id = req.params.id;
@@ -67,9 +67,15 @@ export class StudentController {
   static async create(
     req: Request,
     res: Response<ResponseData<ResponseStudentType>>,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
+      // cek file
+      if (!req.files) {
+        return res
+          .status(400)
+          .json({ success: false, message: "File is required" });
+      }
       const body = validation<CreateStudentType>(StudentValidation.CREATE, {
         ...req.body,
         anak_ke: Number(req.body.anak_ke),
@@ -124,7 +130,7 @@ export class StudentController {
   static async update(
     req: Request<{ id: string }, {}, UpdateStudentType>,
     res: Response<ResponseData<ResponseStudentType>>,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
       const id = req.params.id;
@@ -190,7 +196,7 @@ export class StudentController {
   static async delete(
     req: Request<{ id: string }>,
     res: Response<ResponseMessage>,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
       const id = req.params.id;
@@ -218,7 +224,7 @@ export class StudentController {
   static async search(
     req: Request<{}, {}, {}, { name: string }>,
     res: Response<ResponseData<ResponseStudentType[]>>,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
       const { name } = req.query;
@@ -243,7 +249,7 @@ export class StudentController {
   static async downloadMultiple(
     req: Request<{}, {}, { dokuments: string[] }>,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
       const { dokuments } = req.body;
@@ -255,7 +261,7 @@ export class StudentController {
       res.setHeader("Content-Type", "application/zip");
       res.setHeader(
         "Content-Disposition",
-        `attachment; filename="students.zip"`
+        `attachment; filename="students.zip"`,
       );
 
       const archive = archiver("zip", { zlib: { level: 9 } });
@@ -276,6 +282,47 @@ export class StudentController {
 
       // finalisasi zip
       await archive.finalize();
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // download file
+  static async downloadFiles(
+    req: Request<{}, {}, { files: string[] }>,
+    res: Response<ResponseData<string>>,
+    next: NextFunction,
+  ) {
+    try {
+      // get files from body
+      const { files } = req.body;
+
+      // cek files
+      if (!files || !Array.isArray(files) || files.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: "No files selected",
+        });
+      }
+
+      // folder
+      const folderPath = "student";
+
+      const archive = await FileService.createZip(files, folderPath);
+
+      // set headers untuk zip download
+      res.setHeader("Content-Type", "application/zip");
+      res.setHeader("Content-Disposition", `attachment; filename=files.zip`);
+
+      // kirim zip ke client
+      archive.pipe(res);
+
+      archive.on("error", (err) => {
+        console.error(err);
+        res
+          .status(500)
+          .json({ success: false, message: "Internal server error" });
+      });
     } catch (error) {
       next(error);
     }

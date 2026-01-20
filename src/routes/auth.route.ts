@@ -1,29 +1,28 @@
-import { Router } from 'express'
-import { AuthController } from '../controllers/auth.controller';
-import { zodValidation } from '../middlewares/zod-middleware';
-import { AuthValidation } from '../validations/auth-validation';
-import { LoginType } from '../models/auth-model';
-import { tokenMiddleware } from '../middlewares/token-middleware';
-
-
+import { Router } from "express";
+import { AuthController } from "../controllers/auth.controller";
+import { zodValidation } from "../middlewares/zod-middleware";
+import { AuthValidation } from "../validations/auth-validation";
+import { LoginType } from "../models/auth-model";
+import { tokenMiddleware } from "../middlewares/token-middleware";
 
 // initialization express
 const authRouter: Router = Router();
 
+// login
+authRouter.post(
+  "/login",
+  zodValidation<LoginType>(AuthValidation.LOGIN),
+  AuthController.login,
+);
 
-// cek auth 
-authRouter.post('/cek', tokenMiddleware, AuthController.cekAuth);
+// auth middleware
+authRouter.use(tokenMiddleware);
 
+// cek auth
+authRouter.post("/cek", AuthController.cekAuth);
 
-// login 
-authRouter.post('/login', zodValidation<LoginType>(AuthValidation.LOGIN), AuthController.login);
+// logout
+authRouter.post("/logout", AuthController.logout);
 
-
-// logout 
-authRouter.post('/logout', tokenMiddleware, AuthController.logout);
-
-
-// export 
+// export
 export default authRouter;
-
-

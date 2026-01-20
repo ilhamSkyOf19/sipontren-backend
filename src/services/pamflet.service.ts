@@ -3,31 +3,33 @@ import { FileService } from "./file.service";
 
 export class PamfletService {
   // CREATE
-  static async create(pamflet: string): Promise<{ id: number; img: string }> {
+  static async create(
+    pamflet: string,
+  ): Promise<{ id: number; pamflet: string }> {
     const response = await prisma.pamflet.create({
       data: { pamflet },
     });
 
     return {
       id: response.id,
-      img: response.pamflet,
+      pamflet: response.pamflet,
     };
   }
 
   // READ ALL
-  static async read(): Promise<{ id: number; img: string }[]> {
+  static async read(): Promise<{ id: number; pamflet: string }[]> {
     const response = await prisma.pamflet.findMany({
       orderBy: { createdAt: "desc" },
     });
 
     return response.map((item) => ({
       id: item.id,
-      img: item.pamflet,
+      pamflet: item.pamflet,
     }));
   }
 
   // READ DETAIL
-  static async detail(id: string): Promise<{ id: number; img: string }> {
+  static async detail(id: string): Promise<{ id: number; pamflet: string }> {
     const response = await prisma.pamflet.findUnique({
       where: { id: +id },
     });
@@ -36,15 +38,15 @@ export class PamfletService {
 
     return {
       id: response.id,
-      img: response.pamflet,
+      pamflet: response.pamflet,
     };
   }
 
   // UPDATE
   static async update(
     id: string,
-    pamflet: string
-  ): Promise<{ id: number; img: string }> {
+    pamflet: string,
+  ): Promise<{ id: number; pamflet: string }> {
     const oldPamflet = await this.detail(id);
 
     const response = await prisma.pamflet.update({
@@ -53,16 +55,16 @@ export class PamfletService {
     });
 
     // delete old file
-    await FileService.deleteFormPath(oldPamflet.img, "pamflet");
+    await FileService.deleteFormPath(oldPamflet.pamflet, "pamflet");
 
     return {
       id: response.id,
-      img: response.pamflet,
+      pamflet: response.pamflet,
     };
   }
 
   // DELETE
-  static async delete(id: string): Promise<{ id: number; img: string }> {
+  static async delete(id: string): Promise<{ id: number; pamflet: string }> {
     const pamflet = await this.detail(id);
 
     await prisma.pamflet.delete({
@@ -70,11 +72,11 @@ export class PamfletService {
     });
 
     // delete file
-    await FileService.deleteFormPath(pamflet.img, "pamflet");
+    await FileService.deleteFormPath(pamflet.pamflet, "pamflet");
 
     return {
       id: +id,
-      img: pamflet.img,
+      pamflet: pamflet.pamflet,
     };
   }
 }

@@ -11,30 +11,27 @@ const upload = createMulterUploader({
   uploadPaths: { banner: "public/uploads/banner" },
 });
 
-// create
-bannerRoute.post(
-  "/create",
-  tokenMiddleware,
-  upload.single("banner"),
-  BannerController.create
-);
-
 // read all
 bannerRoute.get("/read", BannerController.read);
 
+// auth middleware
+bannerRoute.use(tokenMiddleware);
+
+// create
+bannerRoute.post("/create", upload.single("banner"), BannerController.create);
+
 // read detail
-bannerRoute.get("/detail/:id", tokenMiddleware, BannerController.readDetail);
+bannerRoute.get("/detail/:id", BannerController.readDetail);
 
 // update
 bannerRoute.patch(
   "/update/:id",
-  tokenMiddleware,
   upload.single("banner"),
-  BannerController.update
+  BannerController.update,
 );
 
 // delete
-bannerRoute.delete("/delete/:id", tokenMiddleware, BannerController.delete);
+bannerRoute.delete("/delete/:id", BannerController.delete);
 
 // export
 export default bannerRoute;

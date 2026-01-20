@@ -4,6 +4,8 @@ import {
   UpdateUstadType,
   ResponseUstadType,
   toResponseUstadType,
+  FilterData,
+  ResponseUstadWithMetaType,
 } from "../models/ustad-model";
 import { ResponseData, ResponseMessage } from "../types/types";
 import { FileService } from "./file.service";
@@ -15,7 +17,7 @@ export class UstadService {
   // =====================
   static async create(
     req: CreateUstadType,
-    ustad_img: string
+    ustad_img: string,
   ): Promise<ResponseUstadType> {
     const ustad = await prisma.ustad.create({
       data: {
@@ -30,11 +32,46 @@ export class UstadService {
   // =====================
   // READ ALL
   // =====================
-  static async read(): Promise<ResponseUstadType[]> {
-    const ustads = await prisma.ustad.findMany();
-    return ustads.map((ustad) => toResponseUstadType(ustad as IUstad));
-  }
+  static async read({
+    search,
+    page = "1",
+  }: FilterData): Promise<ResponseUstadWithMetaType> {
+    const pageSize = 5;
+    const currentPage = +page < 1 ? 1 : +page;
 
+    // total data
+    const totalData = await prisma.ustad.count({
+      where: {
+        name: {
+          contains: search,
+        },
+      },
+    });
+
+    // get total page
+    const totalPage = Math.ceil(totalData / pageSize);
+
+    const response = await prisma.ustad.findMany({
+      where: {
+        name: {
+          contains: search,
+        },
+      },
+      skip: (currentPage - 1) * pageSize,
+      take: pageSize,
+      orderBy: { createdAt: "desc" },
+    });
+
+    return {
+      data: response.map(toResponseUstadType),
+      meta: {
+        currentPage,
+        totalPage,
+        totalData,
+        pageSize,
+      },
+    };
+  }
   // =====================
   // DETAIL
   // =====================
@@ -60,7 +97,7 @@ export class UstadService {
   static async update(
     id: number,
     req: UpdateUstadType,
-    ustad_img?: string
+    ustad_img?: string,
   ): Promise<ResponseData<ResponseUstadType>> {
     const ustad = await prisma.ustad.findUnique({
       where: { id },

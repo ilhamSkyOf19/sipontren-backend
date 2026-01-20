@@ -38,6 +38,17 @@ export type ResponseUstadType = Omit<CreateUstadType, "ustad_img"> & {
   updatedAt: Date;
 };
 
+// response with meta
+export type ResponseUstadWithMetaType = {
+  data: ResponseUstadType[];
+  meta: {
+    currentPage: number;
+    totalPage: number;
+    totalData: number;
+    pageSize: number;
+  };
+};
+
 // to response helper
 export const toResponseUstadType = (ustad: IUstad): ResponseUstadType => ({
   id: ustad.id,
@@ -52,3 +63,9 @@ export const toResponseUstadType = (ustad: IUstad): ResponseUstadType => ({
   createdAt: ustad.createdAt,
   updatedAt: ustad.updatedAt,
 });
+
+// filter data
+export type FilterData = {
+  search?: string;
+  page?: string;
+};

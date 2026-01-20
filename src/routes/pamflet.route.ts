@@ -12,29 +12,30 @@ const upload = createMulterUploader({
 });
 
 // read
-pamfletRoute.post(
-  "/create",
-  tokenMiddleware,
-  upload.single("pamflet"),
-  PamfletController.create
-);
-
-// read
 pamfletRoute.get("/read", PamfletController.read);
 
+// auth middleware
+pamfletRoute.use(tokenMiddleware);
+
+// read
+pamfletRoute.post(
+  "/create",
+  upload.single("pamflet"),
+  PamfletController.create,
+);
+
 // read detail
-pamfletRoute.get("/detail/:id", tokenMiddleware, PamfletController.readDetail);
+pamfletRoute.get("/detail/:id", PamfletController.readDetail);
 
 // update
 pamfletRoute.patch(
   "/update/:id",
-  tokenMiddleware,
   upload.single("pamflet"),
-  PamfletController.update
+  PamfletController.update,
 );
 
 // delete
-pamfletRoute.delete("/delete/:id", tokenMiddleware, PamfletController.delete);
+pamfletRoute.delete("/delete/:id", PamfletController.delete);
 
 // export
 export default pamfletRoute;

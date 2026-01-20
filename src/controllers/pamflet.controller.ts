@@ -6,8 +6,8 @@ export class PamfletController {
   // create
   static async create(
     req: Request,
-    res: Response<ResponseData<{ id: number; img: string }>>,
-    next: NextFunction
+    res: Response<ResponseData<{ id: number; pamflet: string }>>,
+    next: NextFunction,
   ) {
     try {
       if (!req.file) {
@@ -33,8 +33,8 @@ export class PamfletController {
   // read all
   static async read(
     _req: Request,
-    res: Response<ResponseData<{ id: number; img: string }[]>>,
-    next: NextFunction
+    res: Response<ResponseData<{ id: number; pamflet: string }[]>>,
+    next: NextFunction,
   ) {
     try {
       const response = await PamfletService.read();
@@ -53,8 +53,8 @@ export class PamfletController {
   // read detial
   static async readDetail(
     req: Request<{ id: string }>,
-    res: Response<ResponseData<{ id: number; img: string }>>,
-    next: NextFunction
+    res: Response<ResponseData<{ id: number; pamflet: string }>>,
+    next: NextFunction,
   ) {
     try {
       // get id from params
@@ -78,8 +78,8 @@ export class PamfletController {
   // update
   static async update(
     req: Request<{ id: string }>,
-    res: Response<ResponseData<{ id: number; img: string }>>,
-    next: NextFunction
+    res: Response<ResponseData<{ id: number; pamflet: string }>>,
+    next: NextFunction,
   ) {
     try {
       const { id } = req.params;
@@ -107,8 +107,8 @@ export class PamfletController {
   // delete
   static async delete(
     req: Request<{ id: string }>,
-    res: Response<ResponseData<{ id: number; img: string }>>,
-    next: NextFunction
+    res: Response<ResponseData<{ id: number; pamflet: string }>>,
+    next: NextFunction,
   ) {
     try {
       const { id } = req.params;

@@ -1,8 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import {
   CreateNewsType,
+  FilterData,
   NewsFilterType,
   ResponseNewsType,
+  ResponseNewsWithMetaType,
   UpdateNewsType,
 } from "../models/news-model";
 import { ResponseData, ResponseMessage } from "../types/types";
@@ -16,7 +18,7 @@ export class NewsController {
   static async create(
     req: Request<{}, {}, CreateNewsType>,
     res: Response<ResponseData<ResponseNewsType>>,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
       const rawBody = req.body;
@@ -48,14 +50,26 @@ export class NewsController {
 
   // READ ALL =================================================
   static async read(
-    _req: Request,
-    res: Response<ResponseData<ResponseNewsType[]>>,
-    next: NextFunction
+    req: Request<{}, {}, {}, FilterData>,
+    res: Response<ResponseData<ResponseNewsWithMetaType>>,
+    next: NextFunction,
   ) {
     try {
-      const response = await NewsService.read();
+      // get query from params
+      const { from, page, search, to } = req.query;
 
-      return res.status(200).json(response);
+      const response = await NewsService.read({
+        from,
+        page,
+        search,
+        to,
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: "Success read news",
+        data: response,
+      });
     } catch (error) {
       next(error);
     }
@@ -65,7 +79,7 @@ export class NewsController {
   static async readByFilter(
     req: Request<{ filter: NewsFilterType }>,
     res: Response<ResponseData<ResponseNewsType[]>>,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
       // get filter from params
@@ -85,7 +99,7 @@ export class NewsController {
   static async detail(
     req: Request<{ id: string }>,
     res: Response<ResponseData<ResponseNewsType>>,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
       const id = req.params.id; // tetap string untuk Mongoose
@@ -113,7 +127,7 @@ export class NewsController {
   static async update(
     req: Request<{ id: string }>,
     res: Response<ResponseData<ResponseNewsType>>,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
       const id = req.params.id;
@@ -143,7 +157,7 @@ export class NewsController {
       const response = await NewsService.update(
         +id,
         body.data,
-        req.file?.filename
+        req.file?.filename,
       );
 
       if (!response.success) {
@@ -167,7 +181,7 @@ export class NewsController {
   static async delete(
     req: Request<{ id: string }>,
     res: Response<ResponseMessage>,
-    next: NextFunction
+    next: NextFunction,
   ) {
     try {
       const id = req.params.id;

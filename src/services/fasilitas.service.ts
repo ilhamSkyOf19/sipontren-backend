@@ -4,13 +4,15 @@ import {
   UpdateFasilitasType,
   ResponseFasilitasType,
   toResponseFasilitasType,
+  FilterData,
+  ResponseFasilitasWithMetaType,
 } from "../models/fasilitas-model";
 import prisma from "../lib/prismaClient";
 
 export class FasilitasService {
   // create
   static async create(
-    data: CreateFasilitasType & { images: string }
+    data: CreateFasilitasType & { images: string },
   ): Promise<ResponseFasilitasType> {
     const response = await prisma.fasilitas.create({
       data: {
@@ -23,17 +25,49 @@ export class FasilitasService {
     return toResponseFasilitasType(response);
   }
 
-  // read all
-  static async read(): Promise<ResponseFasilitasType[]> {
-    const response = await prisma.fasilitas.findMany({
-      orderBy: {
-        createdAt: "desc",
+  // =====================
+  // READ ALL
+  // =====================
+  static async read({
+    search,
+    page = "1",
+  }: FilterData): Promise<ResponseFasilitasWithMetaType> {
+    const pageSize = 5;
+    const currentPage = +page < 1 ? 1 : +page;
+
+    // total data
+    const totalData = await prisma.fasilitas.count({
+      where: {
+        fasilitas: {
+          contains: search,
+        },
       },
     });
 
-    return response.map(toResponseFasilitasType);
-  }
+    // get total page
+    const totalPage = Math.ceil(totalData / pageSize);
 
+    const response = await prisma.fasilitas.findMany({
+      where: {
+        fasilitas: {
+          contains: search,
+        },
+      },
+      skip: (currentPage - 1) * pageSize,
+      take: pageSize,
+      orderBy: { createdAt: "desc" },
+    });
+
+    return {
+      data: response.map(toResponseFasilitasType),
+      meta: {
+        currentPage,
+        totalPage,
+        totalData,
+        pageSize,
+      },
+    };
+  }
   // read detail
   static async detail(id: string): Promise<ResponseFasilitasType> {
     const response = await prisma.fasilitas.findUnique({
@@ -50,7 +84,7 @@ export class FasilitasService {
   // update
   static async update(
     id: string,
-    data: UpdateFasilitasType & { images?: string }
+    data: UpdateFasilitasType & { images?: string },
   ): Promise<ResponseFasilitasType> {
     const oldData = await prisma.fasilitas.findUnique({
       where: {
