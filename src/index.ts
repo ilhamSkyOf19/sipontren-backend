@@ -19,6 +19,8 @@ import bannerRoute from "./routes/banner.route";
 import fasilitasRoute from "./routes/fasilitas.route";
 
 import { errorMiddleware } from "./middlewares/error-middleware";
+import dashboardRoute from "./routes/dashboard.route";
+import jumlahAlumniRoute from "./routes/jumlahAlumni.route";
 
 // 1. Init Express
 const app = express();
@@ -70,6 +72,8 @@ app.use("/api/alumni", alumniRoute);
 app.use("/api/pamflet", pamfletRoute);
 app.use("/api/banner", bannerRoute);
 app.use("/api/fasilitas", fasilitasRoute);
+app.use("/api/dashboard", dashboardRoute);
+app.use("/api/jumlah-alumni", jumlahAlumniRoute);
 
 // 8. Error middleware
 app.use(errorMiddleware);

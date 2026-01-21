@@ -238,4 +238,23 @@ export class NewsService {
       message: "Berhasil delete news",
     };
   }
+
+  // =====================
+  // GET COUNT
+  // =====================
+
+  static async getCountByCategory(): Promise<{
+    berita: number;
+    artikel: number;
+  }> {
+    const response = await prisma.news.groupBy({
+      by: ["category"],
+      _count: { _all: true },
+    });
+
+    return {
+      berita: response.find((d) => d.category === "berita")?._count._all ?? 0,
+      artikel: response.find((d) => d.category === "artikel")?._count._all ?? 0,
+    };
+  }
 }

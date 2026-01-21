@@ -287,6 +287,27 @@ export class StudentController {
     }
   }
 
+  // get count
+  static async getCount(
+    _req: Request,
+    res: Response<ResponseData<{ laki_laki: number; perempuan: number }>>,
+    next: NextFunction,
+  ) {
+    try {
+      // call service
+      const response = await StudentService.getCountByJenisKelamin();
+
+      // return response
+      return res.status(200).json({
+        success: true,
+        message: "List of students",
+        data: response,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   // download file
   static async downloadFiles(
     req: Request<{}, {}, { files: string[] }>,

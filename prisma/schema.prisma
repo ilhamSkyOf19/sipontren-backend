@@ -105,6 +105,23 @@ model banner {
   updatedAt DateTime @updatedAt
 }
 
+model jumlah_alumni {
+  id        Int      @id @default(autoincrement())
+  laki_laki Int
+  perempuan Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model pendaftaran {
+  id        Int      @id @default(autoincrement())
+  dari      DateTime
+  sampai    DateTime
+  aktif     Boolean
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 enum news_category {
   berita
   artikel

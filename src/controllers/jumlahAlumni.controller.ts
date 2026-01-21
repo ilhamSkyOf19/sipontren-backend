@@ -1,14 +1,16 @@
 import { NextFunction, Request, Response } from "express";
 import { ResponseData } from "../types/types";
-import { ResponseAdminType } from "../models/admin-model";
-import { AdminService } from "../services/admin.service";
-import { RegisterType } from "../models/auth-model";
+import {
+  ResponseJumlahAlumniType,
+  UpdateJumlahAlumniType,
+} from "../models/jumlahAlumni";
+import { JumlahAlumniService } from "../services/jumlahAlumni.service";
 
-export class AdminController {
+export class JumlahAlumniController {
   // create
   static async create(
-    req: Request<{}, {}, RegisterType>,
-    res: Response<ResponseData<ResponseAdminType>>,
+    req: Request<{}, {}, Omit<UpdateJumlahAlumniType, "id">>,
+    res: Response<ResponseData<ResponseJumlahAlumniType | null>>,
     next: NextFunction,
   ) {
     try {
@@ -16,10 +18,10 @@ export class AdminController {
       const body = req.body;
 
       // get service
-      const response = await AdminService.create(body);
+      const response = await JumlahAlumniService.setData(body);
 
       // return
-      return res.status(200).json({
+      return res.status(201).json({
         success: true,
         message: "success created",
         data: response,

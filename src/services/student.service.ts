@@ -15,7 +15,7 @@ export class StudentService {
   // CREATE
   static async create(
     req: CreateStudentType,
-    file: FileStudent
+    file: FileStudent,
   ): Promise<ResponseStudentType> {
     const student = await prisma.student.create({
       data: {
@@ -31,6 +31,7 @@ export class StudentService {
     return toResponseStudentType({
       ...student,
       tanggal_lahir: student.tanggal_lahir,
+      nama_lengkap_wali: student.nama_lengkap_wali || "-",
     });
   }
 
@@ -89,7 +90,13 @@ export class StudentService {
     });
 
     return {
-      data: students.map((item) => toResponseStudentType(item)),
+      data: students.map((item) =>
+        toResponseStudentType({
+          ...item,
+          tanggal_lahir: item.tanggal_lahir,
+          nama_lengkap_wali: item.nama_lengkap_wali || "-",
+        }),
+      ),
       meta: {
         currentPage,
         totalData,
@@ -113,6 +120,7 @@ export class StudentService {
       data: toResponseStudentType({
         ...student,
         tanggal_lahir: student.tanggal_lahir,
+        nama_lengkap_wali: student.nama_lengkap_wali || "-",
       }),
     };
   }
@@ -121,7 +129,7 @@ export class StudentService {
   static async update(
     id: number,
     req: UpdateStudentType,
-    file: Partial<FileStudent>
+    file: Partial<FileStudent>,
   ): Promise<ResponseData<ResponseStudentType>> {
     const student = await prisma.student.findUnique({ where: { id } });
     if (!student) return { success: false, message: "student not found" };
@@ -152,6 +160,7 @@ export class StudentService {
       data: toResponseStudentType({
         ...updated,
         tanggal_lahir: updated.tanggal_lahir,
+        nama_lengkap_wali: student.nama_lengkap_wali || "-",
       }),
     };
   }
@@ -183,7 +192,7 @@ export class StudentService {
 
   // SEARCH BY NAME
   static async searchByName(
-    name: string
+    name: string,
   ): Promise<ResponseData<ResponseStudentType[]>> {
     const students = await prisma.student.findMany({
       where: {
@@ -198,8 +207,27 @@ export class StudentService {
         toResponseStudentType({
           ...item,
           tanggal_lahir: item.tanggal_lahir,
-        })
+          nama_lengkap_wali: item.nama_lengkap_wali || "-",
+        }),
       ),
+    };
+  }
+
+  // get count student by jenis kelamin
+  static async getCountByJenisKelamin(): Promise<{
+    laki_laki: number;
+    perempuan: number;
+  }> {
+    const response = await prisma.student.groupBy({
+      by: ["jenis_kelamin"],
+      _count: { _all: true },
+    });
+
+    return {
+      laki_laki:
+        response.find((d) => d.jenis_kelamin === "laki_laki")?._count._all ?? 0,
+      perempuan:
+        response.find((d) => d.jenis_kelamin === "perempuan")?._count._all ?? 0,
     };
   }
 }

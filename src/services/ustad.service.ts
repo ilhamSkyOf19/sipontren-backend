@@ -152,4 +152,25 @@ export class UstadService {
       message: "success delete ustad",
     };
   }
+
+  // =====================
+  // GET COUNT
+  // =====================
+
+  static async getCountByJenisKelamin(): Promise<{
+    laki_laki: number;
+    perempuan: number;
+  }> {
+    const response = await prisma.ustad.groupBy({
+      by: ["jenis_kelamin"],
+      _count: { _all: true },
+    });
+
+    return {
+      laki_laki:
+        response.find((d) => d.jenis_kelamin === "laki_laki")?._count._all ?? 0,
+      perempuan:
+        response.find((d) => d.jenis_kelamin === "perempuan")?._count._all ?? 0,
+    };
+  }
 }

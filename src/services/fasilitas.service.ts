@@ -122,4 +122,9 @@ export class FasilitasService {
 
     return toResponseFasilitasType(response);
   }
+
+  // get count
+  static async getCount(): Promise<number> {
+    return prisma.fasilitas.count();
+  }
 }

@@ -32,6 +32,9 @@ studentRouter.use(tokenMiddleware);
 studentRouter.post("/download-files", StudentController.downloadFiles);
 
 // create
+studentRouter.get("/count", studentUpload, StudentController.getCount);
+
+// create
 studentRouter.post("/create", studentUpload, StudentController.create);
 
 studentRouter.post("/download", StudentController.downloadMultiple);
