@@ -12,6 +12,7 @@ import { StudentValidation } from "../validations/student-validation";
 import { FileService } from "../services/file.service";
 import { StudentService } from "../services/student.service";
 import archiver from "archiver";
+import { exportStudentExcel } from "../utils/utils";
 
 export class StudentController {
   // read all students
@@ -361,6 +362,48 @@ export class StudentController {
           .status(500)
           .json({ success: false, message: "Internal server error" });
       });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  // download file csv
+  static async exportExcel(
+    req: Request<{}, {}, {}, { from: string; to: string }>,
+    res: Response,
+    next: NextFunction,
+  ) {
+    try {
+      // validasi
+      const query = validation<{ from: string; to: string }>(
+        StudentValidation.QUERY,
+        req.query,
+      );
+
+      // cek query
+      if (!query.success) {
+        return res.status(200).json({
+          success: false,
+          message: "query tidak valid",
+        });
+      }
+
+      const data = await StudentService.getDataByFromTo(
+        query.data.from,
+        query.data.to,
+      );
+      const buffer = await exportStudentExcel(data);
+
+      res.setHeader(
+        "Content-Disposition",
+        "attachment; filename=data-barang.xlsx",
+      );
+      res.setHeader(
+        "Content-Type",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      );
+
+      res.send(Buffer.from(buffer));
     } catch (error) {
       next(error);
     }

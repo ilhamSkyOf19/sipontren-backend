@@ -239,4 +239,33 @@ export class StudentService {
         response.find((d) => d.jenis_kelamin === "perempuan")?._count._all ?? 0,
     };
   }
+
+  // get all data by from & to
+  static async getDataByFromTo(
+    from: string,
+    to: string,
+  ): Promise<
+    Omit<
+      ResponseStudentType,
+      "foto_formal" | "fc_akta_kelahiran" | "foto_kk" | "fc_ktp" | "fc_kis_kip"
+    >[]
+  > {
+    // call prisma
+    const response = await prisma.student.findMany({
+      where: {
+        createdAt: {
+          gte: new Date(from),
+          lte: toEndOfDay(to),
+        },
+      },
+    });
+
+    return response.map((item) =>
+      toResponseStudentType({
+        ...item,
+        tanggal_lahir: item.tanggal_lahir,
+        nama_lengkap_wali: item.nama_lengkap_wali || "-",
+      }),
+    );
+  }
 }

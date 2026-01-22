@@ -31,6 +31,9 @@ studentRouter.use(tokenMiddleware);
 // download
 studentRouter.post("/download-files", StudentController.downloadFiles);
 
+// download file excel
+studentRouter.get("/download-excel", StudentController.exportExcel);
+
 // create
 studentRouter.get("/count", studentUpload, StudentController.getCount);
 
