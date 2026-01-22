@@ -289,13 +289,30 @@ export class StudentController {
 
   // get count
   static async getCount(
-    _req: Request,
+    req: Request<{}, {}, {}, { from: string; to: string }>,
     res: Response<ResponseData<{ laki_laki: number; perempuan: number }>>,
     next: NextFunction,
   ) {
     try {
+      // validasi
+      const query = validation<{ from: string; to: string }>(
+        StudentValidation.QUERY,
+        req.query,
+      );
+
+      // cek query
+      if (!query.success) {
+        return res.status(200).json({
+          success: false,
+          message: "query tidak valid",
+        });
+      }
+
       // call service
-      const response = await StudentService.getCountByJenisKelamin();
+      const response = await StudentService.getCountByJenisKelamin(
+        query.data.from,
+        query.data.to,
+      );
 
       // return response
       return res.status(200).json({

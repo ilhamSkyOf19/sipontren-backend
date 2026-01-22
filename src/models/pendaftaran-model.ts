@@ -7,10 +7,10 @@ export type IPendaftaran = {
   updatedAt: Date;
 };
 
-export type CreatePendaftaranType = Omit<
-  IPendaftaran,
-  "id" | "createdAt" | "updatedAt"
->;
+export type CreatePendaftaranType = {
+  dari: string;
+  sampai: string;
+};
 
 export type UpdatePendaftaranType = Partial<CreatePendaftaranType>;
 

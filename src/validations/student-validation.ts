@@ -130,4 +130,10 @@ export class StudentValidation {
       no_telepon: this.phoneSchema.optional(),
     })
     .strict() satisfies ZodType<UpdateStudentType>;
+
+  // query pendaftaran
+  static readonly QUERY = z.object({
+    from: this.dateSchema,
+    to: this.dateSchema,
+  });
 }

@@ -214,13 +214,22 @@ export class StudentService {
   }
 
   // get count student by jenis kelamin
-  static async getCountByJenisKelamin(): Promise<{
+  static async getCountByJenisKelamin(
+    from: string,
+    to: string,
+  ): Promise<{
     laki_laki: number;
     perempuan: number;
   }> {
     const response = await prisma.student.groupBy({
       by: ["jenis_kelamin"],
       _count: { _all: true },
+      where: {
+        createdAt: {
+          gte: new Date(from),
+          lte: toEndOfDay(to),
+        },
+      },
     });
 
     return {

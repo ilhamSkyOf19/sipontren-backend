@@ -21,7 +21,6 @@ export class UstadValidation {
     .min(3, "tempat lahir minimal 3 karakter")
     .max(50, "tempat lahir maksimal 50 karakter");
 
-  // 👉 tetap STRING sesuai kode kamu
   private static tanggalLahirSchema = z
     .string("tanggal lahir harus diisi")
     .trim()
