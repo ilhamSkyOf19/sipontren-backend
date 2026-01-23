@@ -92,6 +92,36 @@ export class PendaftaranController {
     }
   }
 
+  // get find aktif
+  static async getAktif(
+    _req: Request,
+    res: Response<ResponseData<ResponsePendaftaranType>>,
+    next: NextFunction,
+  ) {
+    try {
+      // call service
+      const response = await PendaftaranService.findAktif();
+
+      // cek
+      if (!response) {
+        return res.status(200).json({
+          success: false,
+          message: "Pendaftaran not found",
+        });
+      }
+
+      // return
+      return res.status(200).json({
+        success: true,
+        message: "Pendaftaran created successfully",
+        data: response,
+      });
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  }
+
   // delete
   static async deleteById(
     req: Request<{ id: string }>,

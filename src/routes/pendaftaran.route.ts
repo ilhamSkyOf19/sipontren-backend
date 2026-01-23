@@ -8,6 +8,9 @@ import { PendaftaranController } from "../controllers/pendaftaran.controller";
 // initialization express
 const pendaftaranRoute: Router = Router();
 
+// cek aktif
+pendaftaranRoute.get("/cek-aktif", PendaftaranController.getAktif);
+
 // auth middleware
 pendaftaranRoute.use(tokenMiddleware);
 

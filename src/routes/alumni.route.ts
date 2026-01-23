@@ -19,7 +19,6 @@ alumniRoute.use(tokenMiddleware);
 // create
 alumniRoute.post(
   "/create",
-  tokenMiddleware,
   upload.single("img_alumni"),
   AlumniController.create,
 );
@@ -30,7 +29,6 @@ alumniRoute.get("/detail/:id", AlumniController.detail);
 // update
 alumniRoute.patch(
   "/update/:id",
-  tokenMiddleware,
   upload.single("img_alumni"),
   AlumniController.update,
 );

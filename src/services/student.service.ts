@@ -42,6 +42,7 @@ export class StudentService {
     to,
     page = "1",
     jenis_kelamin,
+    jenis_sekolah,
   }: FilterData): Promise<ResponseStudentWithMetaType> {
     const pageSize = 5;
     const currentPage = +page < 1 ? 1 : +page;
@@ -68,6 +69,12 @@ export class StudentService {
         jenis_kelamin
           ? {
               jenis_kelamin: jenis_kelamin,
+            }
+          : {},
+
+        jenis_sekolah
+          ? {
+              jenis_sekolah: jenis_sekolah,
             }
           : {},
       ],

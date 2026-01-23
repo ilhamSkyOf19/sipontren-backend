@@ -65,9 +65,9 @@ export class UstadController {
   ) {
     try {
       // get params from query
-      const { page, search } = req.query;
+      const { page, search, limit } = req.query;
 
-      const response = await UstadService.read({ page, search });
+      const response = await UstadService.read({ page, search, limit });
 
       return res.status(200).json({
         success: true,

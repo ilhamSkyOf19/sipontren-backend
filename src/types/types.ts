@@ -19,8 +19,12 @@ export type ResponseMessage = {
 };
 
 // response token
-export interface TokenRequest<params = {}, _ = {}, body = {}, query = {}>
-  extends Request<params, _, body, query> {
+export interface TokenRequest<
+  params = {},
+  _ = {},
+  body = {},
+  query = {},
+> extends Request<params, _, body, query> {
   data?: {
     id: number;
     name: string;
@@ -35,4 +39,5 @@ export type FilterData = {
   search?: string;
   page?: string;
   jenis_kelamin?: "laki_laki" | "perempuan";
+  jenis_sekolah?: "SD" | "SMP" | "SMA";
 };

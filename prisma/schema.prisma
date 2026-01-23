@@ -72,7 +72,9 @@ model student {
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
 
-  @@index([createdAt, jenis_kelamin, nama_lengkap])
+  @@index([createdAt])
+  @@index([jenis_kelamin])
+  @@index([jenis_sekolah])
 }
 
 model ustad {
@@ -122,6 +124,22 @@ model pendaftaran {
   updatedAt DateTime @updatedAt
 }
 
+model prestasi {
+  id                Int               @id @default(autoincrement())
+  category_prestasi category_prestasi
+  nama              String
+  tahun_prestasi    Int
+  prestasi          String            @db.MediumText
+  photo             String
+  jenis_kelamin     jenis_kelamin
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category_prestasi])
+  @@index([category_prestasi, tahun_prestasi])
+}
+
 enum news_category {
   berita
   artikel
@@ -145,4 +163,17 @@ enum student_jenis_kelamin {
 
 enum admin_role {
   admin
+}
+
+enum category_prestasi {
+  internasional
+  nasional
+  provinsi
+  kabupaten
+  kecamatan
+}
+
+enum jenis_kelamin {
+  laki_laki
+  perempuan
 }

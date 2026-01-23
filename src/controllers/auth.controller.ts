@@ -82,12 +82,13 @@ export class AuthController {
     next: NextFunction,
   ) {
     try {
-      // delete cookie
+      const isProduction = process.env.NODE_ENV === "production";
+
+      // Clear cookie
       res.clearCookie("token", {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 24 * 60 * 60 * 1000,
-        // sameSite: 'none'
+        secure: isProduction,
+        sameSite: isProduction ? "none" : "lax",
       });
 
       // return response

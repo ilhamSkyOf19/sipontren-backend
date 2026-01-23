@@ -35,8 +35,9 @@ export class UstadService {
   static async read({
     search,
     page = "1",
+    limit = "5",
   }: FilterData): Promise<ResponseUstadWithMetaType> {
-    const pageSize = 5;
+    const pageSize = +limit ? (+limit < 1 ? 5 : +limit) : 5;
     const currentPage = +page < 1 ? 1 : +page;
 
     // total data

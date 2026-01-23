@@ -68,4 +68,5 @@ export const toResponseUstadType = (ustad: IUstad): ResponseUstadType => ({
 export type FilterData = {
   search?: string;
   page?: string;
+  limit?: string;
 };

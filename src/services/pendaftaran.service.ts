@@ -2,6 +2,7 @@ import prisma from "../lib/prismaClient";
 import {
   CreatePendaftaranType,
   ResponsePendaftaranType,
+  toResponsePendaftaranType,
 } from "../models/pendaftaran-model";
 import { ResponseMessage } from "../types/types";
 
@@ -46,11 +47,14 @@ export class PendaftaranService {
   }
 
   // cek find data aktif
-  static async findAktif(): Promise<boolean> {
+  static async findAktif(): Promise<ResponsePendaftaranType | null> {
     const response = await prisma.pendaftaran.findFirst({
       where: { aktif: true },
     });
-    return response !== null;
+
+    if (!response) return null;
+
+    return toResponsePendaftaranType(response);
   }
 
   // delete

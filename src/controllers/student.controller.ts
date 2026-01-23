@@ -23,7 +23,8 @@ export class StudentController {
   ) {
     try {
       // get query
-      const { from, search, to, page, jenis_kelamin } = req.query;
+      const { from, search, to, page, jenis_kelamin, jenis_sekolah } =
+        req.query;
 
       const response = await StudentService.read({
         from,
@@ -31,6 +32,7 @@ export class StudentController {
         to,
         page,
         jenis_kelamin,
+        jenis_sekolah,
       });
 
       return res.status(200).json({
