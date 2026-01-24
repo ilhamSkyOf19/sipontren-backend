@@ -129,7 +129,7 @@ model prestasi {
   category_prestasi category_prestasi
   nama              String
   tahun_prestasi    Int
-  prestasi          String            @db.MediumText
+  prestasi          String
   photo             String
   jenis_kelamin     jenis_kelamin
 

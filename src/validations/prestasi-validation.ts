@@ -18,7 +18,7 @@ export class PrestasiValidation {
     .string()
     .trim()
     .min(5, "Prestasi minimal 5 karakter")
-    .max(500, "Prestasi terlalu panjang");
+    .max(100, "Prestasi terlalu panjang");
 
   // CREATE
   static readonly CREATE = z
@@ -31,7 +31,7 @@ export class PrestasiValidation {
         "kecamatan",
       ]),
       nama: this.namaSchema,
-      tahun_prestasi: z.number().int().min(1900),
+      tahun_prestasi: z.number().int().min(2005, "Tahun prestasi minimal 2005"),
       prestasi: this.prestasiSchema,
       jenis_kelamin: z.enum(["laki_laki", "perempuan"]),
     })
@@ -50,7 +50,11 @@ export class PrestasiValidation {
         ])
         .optional(),
       nama: this.namaSchema.optional(),
-      tahun_prestasi: z.number().int().optional(),
+      tahun_prestasi: z
+        .number()
+        .int()
+        .min(2005, "Tahun prestasi minimal 2005")
+        .optional(),
       prestasi: this.prestasiSchema.optional(),
       jenis_kelamin: z.enum(["laki_laki", "perempuan"]).optional(),
     })

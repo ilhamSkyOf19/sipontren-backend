@@ -36,6 +36,7 @@ export class PrestasiService {
     category_prestasi,
     jenis_kelamin,
     page = "1",
+    tahun_prestasi,
   }: FilterPrestasiData): Promise<ResponsePrestasiWithMetaType> {
     const pageSize = 5;
     const currentPage = +page < 1 ? 1 : +page;
@@ -43,6 +44,7 @@ export class PrestasiService {
     const where = {
       ...(category_prestasi && { category_prestasi }),
       ...(jenis_kelamin && { jenis_kelamin }),
+      ...(tahun_prestasi && { tahun_prestasi: +tahun_prestasi }),
       ...(search && {
         OR: [
           { nama: { contains: search } },

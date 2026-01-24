@@ -147,7 +147,12 @@ export class PrestasiController {
 
       const body = validation<Omit<UpdatePrestasiType, "photo" | "id">>(
         PrestasiValidation.UPDATE,
-        req.body,
+        {
+          ...req.body,
+          tahun_prestasi: req.body.tahun_prestasi
+            ? +req.body.tahun_prestasi
+            : undefined,
+        },
       );
 
       if (!body.success) {

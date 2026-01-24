@@ -73,6 +73,6 @@ export type FilterPrestasiData = {
   search?: string;
   category_prestasi?: CategoryPrestasi;
   jenis_kelamin?: JenisKelamin;
-  tahun_prestasi?: number;
+  tahun_prestasi?: string;
   page?: string;
 };
