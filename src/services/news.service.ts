@@ -1,4 +1,5 @@
 import {
+  CreateLinkBeritaInputType,
   CreateNewsType,
   FilterData,
   NewsFilterType,
@@ -10,37 +11,60 @@ import {
 import { ResponseData, ResponseMessage } from "../types/types";
 import { FileService } from "./file.service";
 import { prisma } from "../lib/prismaClient";
-import { title } from "node:process";
-import { getEndOfToday, getStartOfToday, toEndOfDay } from "../utils/utils";
+import {
+  getEndOfToday,
+  getStartOfToday,
+  toEndOfDay,
+  toStartOfDay,
+} from "../utils/utils";
 
 export class NewsService {
   // =======================
-  // CREATE
+  // CREATE (WITH LINK_BERITA)
   // =======================
   static async create(
     req: CreateNewsType,
     thumbnail: string,
   ): Promise<ResponseData<ResponseNewsType>> {
-    const created = await prisma.news.create({
-      data: {
-        category: req.category,
-        title: req.title,
-        content: req.content,
-        thumbnail,
-      },
+    const response = await prisma.$transaction(async (tx) => {
+      // 1. create news
+      const news = await tx.news.create({
+        data: {
+          category: req.category,
+          title: req.title,
+          content: req.content,
+          thumbnail,
+        },
+      });
+
+      // 2. create link berita (jika ada)
+      if (req.link_berita && req.link_berita.length > 0) {
+        await tx.link_berita.createMany({
+          data: req.link_berita.map((item) => ({
+            label: item.label,
+            link: item.link,
+            newsId: news.id,
+          })),
+        });
+      }
+
+      // 3. ambil ulang dengan relasi
+      return tx.news.findUnique({
+        where: { id: news.id },
+        include: { link_berita: true },
+      });
     });
 
     return {
       success: true,
       message: "Berhasil membuat news",
-      data: toResponseNews(created),
+      data: toResponseNews(response!),
     };
   }
 
   // =======================
-  // READ ALL (TODAY)
+  // READ ALL (PAGINATION)
   // =======================
-  // READ ALL
   static async read({
     from,
     search,
@@ -50,44 +74,40 @@ export class NewsService {
     const pageSize = 5;
     const currentPage = +page < 1 ? 1 : +page;
 
-    // filter reusable
     const whereCondition = {
       AND: [
-        // SEARCH NAMA
         search
           ? {
               OR: [{ title: { contains: search } }],
             }
           : {},
-
-        // FILTER TANGGAL
         {
           createdAt: {
-            gte: from ? new Date(from) : getStartOfToday(),
+            gte: from ? toStartOfDay(from) : getStartOfToday(),
             lte: to ? toEndOfDay(to) : getEndOfToday(),
           },
         },
       ],
     };
 
-    // total data
     const totalData = await prisma.news.count({
       where: whereCondition,
     });
 
-    // get total page
     const totalPage = Math.ceil(totalData / pageSize);
 
-    // ambil data per halaman
-    const students = await prisma.news.findMany({
+    const newsList = await prisma.news.findMany({
       where: whereCondition,
       skip: (currentPage - 1) * pageSize,
       take: pageSize,
       orderBy: { createdAt: "desc" },
+      include: {
+        link_berita: true, // ⬅️ RELASI
+      },
     });
 
     return {
-      data: students.map((item) => toResponseNews(item)),
+      data: newsList.map(toResponseNews),
       meta: {
         currentPage,
         totalData,
@@ -98,7 +118,7 @@ export class NewsService {
   }
 
   // =======================
-  // READ BY FILTER
+  // READ BY FILTER (HOME)
   // =======================
   static async readByFilter(
     filter: NewsFilterType = "today",
@@ -140,6 +160,9 @@ export class NewsService {
       },
       orderBy: { createdAt: "desc" },
       take: 8,
+      include: {
+        link_berita: true, // ⬅️ RELASI
+      },
     });
 
     return {
@@ -155,6 +178,9 @@ export class NewsService {
   static async detail(id: number): Promise<ResponseData<ResponseNewsType>> {
     const news = await prisma.news.findUnique({
       where: { id },
+      include: {
+        link_berita: true, // ⬅️ RELASI
+      },
     });
 
     if (!news) {
@@ -172,43 +198,65 @@ export class NewsService {
   }
 
   // =======================
-  // UPDATE
+  // UPDATE (TANPA SYNC LINK)
   // =======================
   static async update(
     id: number,
-    req: UpdateNewsType,
+    req: Omit<UpdateNewsType, "link_berita" | "update_link_berita">,
     thumbnail?: string,
+    link_berita?: CreateLinkBeritaInputType[],
   ): Promise<ResponseData<ResponseNewsType>> {
-    const existing = await prisma.news.findUnique({
-      where: { id },
-    });
+    const response = await prisma.$transaction(async (tx) => {
+      // 1️⃣ cek existing
+      const existing = await tx.news.findUnique({
+        where: { id },
+      });
 
-    if (!existing) {
-      return {
-        success: false,
-        message: "News not found",
-      };
-    }
+      if (!existing) {
+        throw new Error("NEWS_NOT_FOUND");
+      }
 
-    let finalThumbnail = existing.thumbnail;
+      // 2️⃣ handle thumbnail
+      let finalThumbnail = existing.thumbnail;
 
-    if (thumbnail) {
-      await FileService.deleteFormPath(existing.thumbnail, "news");
-      finalThumbnail = thumbnail;
-    }
+      if (thumbnail) {
+        await FileService.deleteFormPath(existing.thumbnail, "news");
+        finalThumbnail = thumbnail;
+      }
 
-    const updated = await prisma.news.update({
-      where: { id },
-      data: {
-        ...req,
-        thumbnail: finalThumbnail,
-      },
+      // 3️⃣ update news
+      const updated = await tx.news.update({
+        where: { id },
+        data: {
+          ...req,
+          thumbnail: finalThumbnail,
+        },
+      });
+
+      // 4️⃣ create link berita (jika ada)
+      if (link_berita && link_berita.length > 0) {
+        await tx.link_berita.createMany({
+          data: link_berita.map((item) => ({
+            label: item.label,
+            link: item.link,
+            newsId: updated.id,
+          })),
+        });
+      }
+
+      // 5️⃣ ambil ulang dengan relasi
+      return tx.news.findUnique({
+        where: { id: updated.id },
+        include: {
+          link_berita: true,
+        },
+      });
     });
 
     return {
       success: true,
       message: "Berhasil update news",
-      data: toResponseNews(updated),
+      data: toResponseNews(response!),
     };
   }
 
@@ -227,6 +275,7 @@ export class NewsService {
       };
     }
 
+    // link_berita otomatis kehapus (onDelete: Cascade)
     await prisma.news.delete({
       where: { id },
     });
@@ -240,9 +289,8 @@ export class NewsService {
   }
 
   // =====================
-  // GET COUNT
+  // GET COUNT BY CATEGORY
   // =====================
-
   static async getCountByCategory(): Promise<{
     berita: number;
     artikel: number;

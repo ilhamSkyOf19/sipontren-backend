@@ -83,7 +83,8 @@ app.use("/api/prestasi", prestasiRoute);
 app.use(errorMiddleware);
 
 // 9. Run server
-const port = process.env.PORT || 3001;
+const port = process.env.PORT;
+
 app.listen(port, () => {
   console.log(`🚀 Server running on port ${port}`);
 });

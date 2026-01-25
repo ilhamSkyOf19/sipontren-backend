@@ -2,12 +2,6 @@
 import { IStudent, ResponseStudentType } from "../models/student-model";
 import ExcelJS from "exceljs";
 
-export function getStartOfToday() {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0); // mulai 00:00:00
-  return d;
-}
-
 export const getTodayLocal = (date: Date = new Date()): string => {
   date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
   return date.toISOString().split("T")[0];
@@ -24,10 +18,42 @@ export function getNowLocalISO(): string {
   return localTime.toISOString().slice(0, 19); // "YYYY-MM-DDTHH:MM:SS"
 }
 
+export function getStartOfToday() {
+  const now = new Date();
+
+  const startWIB = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    0,
+    0,
+    0,
+    0,
+  );
+
+  // convert WIB → UTC
+  startWIB.setHours(startWIB.getHours() - 7);
+
+  return startWIB;
+}
+
 export function getEndOfToday() {
-  const d = new Date();
-  d.setHours(23, 59, 59, 999);
-  return d;
+  const now = new Date();
+
+  const endWIB = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    23,
+    59,
+    59,
+    999,
+  );
+
+  // convert WIB → UTC
+  endWIB.setHours(endWIB.getHours() - 7);
+
+  return endWIB;
 }
 
 // get start month
@@ -45,12 +71,14 @@ export function getEndOfCurrentMonth(): Date {
 export const toStartOfDay = (date: string) => {
   const d = new Date(date);
   d.setHours(0, 0, 0, 0);
+  d.setHours(d.getHours() - 7);
   return d;
 };
 
 export const toEndOfDay = (date: string) => {
   const d = new Date(date);
   d.setHours(23, 59, 59, 999);
+  d.setHours(d.getHours() - 7);
   return d;
 };
 

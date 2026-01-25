@@ -8,7 +8,12 @@ import {
   toResponseStudentType,
 } from "../models/student-model";
 import { FilterData, ResponseData, ResponseMessage } from "../types/types";
-import { getEndOfToday, getStartOfToday, toEndOfDay } from "../utils/utils";
+import {
+  getEndOfToday,
+  getStartOfToday,
+  toEndOfDay,
+  toStartOfDay,
+} from "../utils/utils";
 import { FileService } from "./file.service";
 
 export class StudentService {
@@ -60,7 +65,7 @@ export class StudentService {
         // FILTER TANGGAL
         {
           createdAt: {
-            gte: from ? new Date(from) : getStartOfToday(),
+            gte: from ? toStartOfDay(from) : getStartOfToday(),
             lte: to ? toEndOfDay(to) : getEndOfToday(),
           },
         },

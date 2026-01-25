@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import {
   CreateNewsType,
   FilterData,
+  LinkBeritaUpdate,
   NewsFilterType,
   ResponseNewsType,
   ResponseNewsWithMetaType,
@@ -12,6 +13,7 @@ import { NewsService } from "../services/news.service";
 import { NewsValidation } from "../validations/news-validation";
 import { validation } from "../services/validation.service";
 import { FileService } from "../services/file.service";
+import { LinkBeritaService } from "../services/linkBerita.service";
 
 export class NewsController {
   // CREATE ===================================================
@@ -21,13 +23,26 @@ export class NewsController {
     next: NextFunction,
   ) {
     try {
-      const rawBody = req.body;
-
       if (!req.file) {
         return res.status(400).json({
           success: false,
           message: "File is required",
         });
+      }
+
+      const rawBody: CreateNewsType = { ...req.body };
+
+      // ⬇️ handle multipart: link_berita bisa string JSON
+      if (rawBody.link_berita && typeof rawBody.link_berita === "string") {
+        try {
+          rawBody.link_berita = JSON.parse(rawBody.link_berita);
+        } catch {
+          await FileService.deleteFile(req.file.path);
+          return res.status(400).json({
+            success: false,
+            message: "link_berita harus berupa JSON array",
+          });
+        }
       }
 
       const body = validation<CreateNewsType>(NewsValidation.CREATE, rawBody);
@@ -44,6 +59,7 @@ export class NewsController {
 
       return res.status(201).json(response);
     } catch (error) {
+      if (req.file) await FileService.deleteFile(req.file.path);
       next(error);
     }
   }
@@ -55,7 +71,6 @@ export class NewsController {
     next: NextFunction,
   ) {
     try {
-      // get query from params
       const { from, page, search, to } = req.query;
 
       const response = await NewsService.read({
@@ -75,20 +90,17 @@ export class NewsController {
     }
   }
 
-  // Read by filter
+  // READ BY FILTER ==========================================
   static async readByFilter(
     req: Request<{ filter: NewsFilterType }>,
     res: Response<ResponseData<ResponseNewsType[]>>,
     next: NextFunction,
   ) {
     try {
-      // get filter from params
       const filter = req.params.filter;
 
-      // call service
       const response = await NewsService.readByFilter(filter);
 
-      // return response
       return res.status(200).json(response);
     } catch (error) {
       next(error);
@@ -102,7 +114,7 @@ export class NewsController {
     next: NextFunction,
   ) {
     try {
-      const id = req.params.id; // tetap string untuk Mongoose
+      const id = req.params.id;
 
       const response = await NewsService.detail(+id);
 
@@ -123,41 +135,93 @@ export class NewsController {
     }
   }
 
-  // UPDATE ====================================================
+  // UPDATE ===================================================
   static async update(
-    req: Request<{ id: string }>,
+    req: Request<{ id: string }, {}, UpdateNewsType>,
     res: Response<ResponseData<ResponseNewsType>>,
     next: NextFunction,
   ) {
     try {
       const id = req.params.id;
 
-      // cek apakah news ada
       const existing = await NewsService.detail(+id);
-      if (!existing) {
+      if (!existing?.success) {
         if (req.file) await FileService.deleteFile(req.file.path);
-
         return res.status(404).json({
           success: false,
           message: "news not found",
         });
       }
 
-      const body = validation<UpdateNewsType>(NewsValidation.UPDATE, req.body);
+      const rawBody: UpdateNewsType = { ...req.body };
+
+      if (rawBody.link_berita && typeof rawBody.link_berita === "string") {
+        try {
+          rawBody.link_berita = JSON.parse(rawBody.link_berita);
+        } catch {
+          if (req.file) {
+            await FileService.deleteFile(req.file.path);
+          }
+          return res.status(400).json({
+            success: false,
+            message: "link_berita harus berupa JSON array",
+          });
+        }
+      }
+
+      // field update link
+      if (
+        rawBody.update_link_berita &&
+        typeof rawBody.update_link_berita === "string"
+      ) {
+        try {
+          rawBody.update_link_berita = JSON.parse(rawBody.update_link_berita);
+        } catch {
+          if (req.file) {
+            await FileService.deleteFile(req.file.path);
+          }
+          return res.status(400).json({
+            success: false,
+            message: "link_berita harus berupa JSON array",
+          });
+        }
+      }
+
+      const body = validation<UpdateNewsType>(NewsValidation.UPDATE, rawBody);
 
       if (!body.success) {
         if (req.file) await FileService.deleteFile(req.file.path);
-
         return res.status(400).json({
           success: false,
           message: body.message,
         });
       }
 
+      // cek link berita
+      if (body.data.update_link_berita) {
+        // cek link berita
+        for (const item of body.data.update_link_berita) {
+          if (item.action === "delete") {
+            await LinkBeritaService.delete(item.id);
+          } else if (item.action === "update") {
+            await LinkBeritaService.update({
+              id: item.id,
+              label: item.label,
+              link: item.link,
+            });
+          }
+        }
+      }
+
       const response = await NewsService.update(
         +id,
-        body.data,
+        {
+          category: body.data.category,
+          title: body.data.title,
+          content: body.data.content,
+        },
         req.file?.filename,
+        req.body.link_berita ? body.data.link_berita : undefined,
       );
 
       if (!response.success) {
@@ -173,11 +237,12 @@ export class NewsController {
         data: response.data,
       });
     } catch (error) {
+      if (req.file) await FileService.deleteFile(req.file.path);
       next(error);
     }
   }
 
-  // DELETE ====================================================
+  // DELETE ===================================================
   static async delete(
     req: Request<{ id: string }>,
     res: Response<ResponseMessage>,

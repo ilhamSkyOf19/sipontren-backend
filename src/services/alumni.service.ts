@@ -16,7 +16,7 @@ export class AlumniService {
   // =======================
   static async create(
     req: Omit<CreateAlumniType, "img_alumni">,
-    img_alumni: string
+    img_alumni: string,
   ): Promise<ResponseAlumniType> {
     const response = await prisma.alumni.create({
       data: {
@@ -102,7 +102,7 @@ export class AlumniService {
   static async update(
     id: number,
     img_alumni: string,
-    req: Omit<UpdateAlumniType, "img_alumni" | "id">
+    req: Omit<UpdateAlumniType, "img_alumni" | "id">,
   ): Promise<ResponseData<ResponseAlumniType>> {
     const alumni = await prisma.alumni.findUnique({
       where: { id },
